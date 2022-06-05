@@ -1,0 +1,107 @@
+name: "Helm Chart: Diff/lint"
+
+on:
+  workflow_call:
+    inputs:
+      git_ref:
+        description: The branch or tag ref to check out, e.g. `refs/heads/develop`.
+        required: true
+        type: string
+      repository:
+        description: The GitHub repository to clone, e.g. 'slateci/helm-slate-api'.
+        required: true
+        type: string
+
+    secrets:
+      gc_compute_zone:
+        description: The Google Cloud Compute Zone where the assets reside.
+        required: true
+      gc_gke_cluster:
+        description: The cluster name on the Google Kubernetes Engine (GKE).
+        required: true
+      gc_service_account:
+        description: The Google Cloud Service Account tied to the WIP.
+        required: true
+      gc_workload_identity_provider:
+        description: The Google Cloud Workload Identity Provider (WIP).
+        required: true
+
+jobs:
+  diff-lint:
+    name: Helm Diff/Lint
+    runs-on: ubuntu-20.04
+    
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          path: .
+          ref: ${{ inputs.git_ref }}
+          repository: ${{ inputs.repository }}
+
+      - name: Set Up Tools
+        uses: ./.github/actions/gcloud-helm-setup
+        with:
+          cluster_name: ${{ secrets.gc_gke_cluster }}
+          location: ${{ secrets.gc_compute_zone }}
+          service_account: ${{ secrets.gc_service_account }}
+          workload_identity_provider: ${{ secrets.gc_workload_identity_provider }}
+
+      - name: Diff the DEV chart
+        if: ${{ inputs.git_ref }} == 'refs/heads/develop'
+        run: |-
+          helm secrets diff upgrade slate-api-dev . \
+          -f ./vars/dev/secrets.yml \
+          -f ./vars/dev/values.yml \
+          -f ./vars/secrets.yml \
+          -f ./vars/values.yml \
+          -n development
+
+      - name: Diff the STAGING chart
+        run: |-
+          helm secrets diff upgrade slate-api-staging . \
+          -f ./vars/staging/secrets.yml \
+          -f ./vars/staging/values.yml \
+          -f ./vars/secrets.yml \
+          -f ./vars/values.yml \
+          -n staging
+
+      - name: Diff the PROD chart
+        run: |-
+          helm secrets diff upgrade slate-api-prod . \
+          -f ./vars/prod/secrets.yml \
+          -f ./vars/prod/values.yml \
+          -f ./vars/secrets.yml \
+          -f ./vars/values.yml \
+          -n production \
+          --allow-unreleased
+
+      - name: Lint the DEV chart
+        if: ${{ inputs.git_ref }} == 'refs/heads/develop'
+        run: |-
+          helm secrets lint . \
+          -f ./vars/dev/secrets.yml \
+          -f ./vars/dev/values.yml \
+          -f ./vars/secrets.yml \
+          -f ./vars/values.yml
+          
+      - name: Lint the STAGING chart
+        run: |-
+          helm secrets lint . \
+          -f ./vars/staging/secrets.yml \
+          -f ./vars/staging/values.yml \
+          -f ./vars/secrets.yml \
+          -f ./vars/values.yml
+
+      - name: Lint the PROD chart
+        run: |-
+          helm secrets lint . \
+          -f ./vars/prod/secrets.yml \
+          -f ./vars/prod/values.yml \
+          -f ./vars/secrets.yml \
+          -f ./vars/values.yml

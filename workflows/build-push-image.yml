@@ -1,0 +1,79 @@
+name: Build & push image
+
+on:
+  workflow_call:
+    inputs:
+      cr_domain:
+        description: The domain of the Container Registry (CR).
+        required: true
+        type: string
+      cr_repository:
+        description: Repository where the built image shall be pushed, e.g. 'slate-api'.
+        required: true
+        type: string
+      helm_release_namespace:
+        description: Kubernetes namespace corresponding to a Helm release, e.g. 'development'.
+        required: true
+        type: string
+      repository:
+        description: The GitHub repository to clone, e.g. 'slateci/slate-client-server'.
+        required: true
+        type: string
+
+    secrets:
+      cr_password:
+        description: The password for the robot account on the CR.
+        required: true
+      cr_username:
+        description: The username for the robot account on the CR.
+        required: true
+
+jobs:
+  build-push:
+    name: Build/push image
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Download Shared Workflow Properties
+        uses: actions/download-artifact@v3
+        with:
+          name: shared-workflow-props
+
+      - name: Apply Shared Workflow Properties
+        run: |-
+          source workflow.properties
+          echo "RELEASE_VERSION=${releaseVersion}" >> $GITHUB_ENV
+
+      - name: "Chosen environment: development"
+        if: ${{ inputs.helm_release_namespace == 'development' }}
+        run: |-
+          echo "GIT_REF=refs/heads/develop" >> $GITHUB_ENV
+
+      - name: "Chosen environment: staging"
+        if: ${{ inputs.helm_release_namespace == 'staging' }}
+        run: |-
+          echo "GIT_REF=refs/heads/master" >> $GITHUB_ENV
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to CR
+        run: echo '${{ secrets.cr_password }}' | docker login https://${{ inputs.cr_domain }} -u '${{ secrets.cr_username }}' --password-stdin
+
+      - name: Check out repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ env.GIT_REF }}
+          path: .
+          repository: ${{ inputs.repository }}
+
+      - name: Build/push image to CR
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ./resources/docker/Dockerfile
+          build-args: versionoverride=${{ env.RELEASE_VERSION }}
+          target: release-stage
+          push: true
+          tags: "${{ inputs.cr_domain }}/slate/${{ inputs.cr_repository }}:${{ env.RELEASE_VERSION }}"

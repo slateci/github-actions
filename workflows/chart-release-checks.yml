@@ -1,0 +1,51 @@
+name: Chart Release Checks
+
+on:
+  workflow_call:
+    inputs:
+      python_version:
+        description: The version of Python to use, e.g. 3.9.
+        required: false
+        default: 3.9
+        type: string
+      release_expected:
+        description: The expected release semantic version, e.g. '1.0.0'.
+        required: true
+        type: string
+
+jobs:
+  checks:
+    name: Checks
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Download Shared Workflow Properties
+        uses: actions/download-artifact@v3
+        with:
+          name: shared-workflow-props
+
+      - name: Apply Shared Workflow Properties
+        run: |-
+          source workflow.properties
+          echo "RELEASE_VERSION=${releaseVersion}" >> $GITHUB_ENV
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ inputs.python_version }}
+          architecture: x64
+
+      - name: Install Python packages
+        uses: BSFishy/pip-action@v1
+        with:
+          packages: semver
+
+      - name: Compare Release Versions
+        uses: jannekem/run-python-script-action@v1
+        with:
+          script: |
+            import os
+            import semver
+            
+            if semver.compare("${{ inputs.release-semver }}", os.environ.get('RELEASE_VERSION')) != 0:
+              raise Exception(".Chart.appVersion" does not match chosen release version.)"

@@ -1,0 +1,99 @@
+name: Helm Upgrade
+
+on:
+  workflow_call:
+    inputs:
+      helm_release_namespace:
+        description: Kubernetes namespace corresponding to a Helm release, e.g. 'development'.
+        required: true
+        type: string
+      helm_release-prefix:
+        description: The prefix used for the Helm release, e.g. 'slate-portal', 'slate-api'.
+        required: true
+        type: string
+      repository:
+        description: The GitHub repository to clone, e.g. 'slateci/helm-slate-api'.
+        required: true
+        type: string
+      prod_git_ref:
+        description: The git ref to use when deployment to production, e.g. '/refs/tags/v1.0.4'.
+        required: false
+        type: string
+
+    secrets:
+      gc_compute_zone:
+        description: The Google Cloud Compute Zone where the assets reside.
+        required: true
+      gc_gke_cluster:
+        description: The cluster name on the Google Kubernetes Engine (GKE).
+        required: true
+      gc_service_account:
+        description: The Google Cloud Service Account tied to the WIP.
+        required: true
+      gc_workload_identity_provider:
+        description: The Google Cloud Workload Identity Provider (WIP).
+        required: true
+
+jobs:
+  upgrade:
+    name: Run Helm Upgrade on GKE
+    runs-on: ubuntu-20.04
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Download Shared Workflow Properties
+        uses: actions/download-artifact@v3
+        with:
+          name: shared-workflow-props
+
+      - name: Apply Shared Workflow Properties
+        run: |-
+          source workflow.properties
+          echo "RELEASE_VERSION=${releaseVersion}" >> $GITHUB_ENV
+
+      - name: "Chosen environment: development"
+        if: ${{ inputs.helm_release_namespace == 'development' }}
+        run: |-
+          echo "GIT_REF=refs/heads/develop" >> $GITHUB_ENV
+          echo "HELM_RELEASE_NAMESPACE_SHORTHAND=dev" >> $GITHUB_ENV
+
+      - name: "Chosen environment: staging"
+        if: ${{ inputs.helm_release_namespace == 'staging' }}
+        run: |-
+          echo "GIT_REF=refs/heads/master" >> $GITHUB_ENV
+          echo "HELM_RELEASE_NAMESPACE_SHORTHAND=staging" >> $GITHUB_ENV 
+
+      - name: "Chosen environment: production"
+        if: ${{ inputs.helm_release_namespace == 'production' }}
+        run: |-
+          echo "GIT_REF=${{ inputs.prod_git_ref }}" >> $GITHUB_ENV
+          echo "HELM_RELEASE_NAMESPACE_SHORTHAND=prod" >> $GITHUB_ENV 
+
+      - name: Check out repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          path: .
+          ref: ${{ env.GIT_REF }}
+          repository: ${{ inputs.repository }}
+
+      - name: Set Up Tools
+        uses: ./.github/actions/gcloud-helm-setup.yml
+        with:
+          cluster_name: ${{ secrets.gc_gke_cluster }}
+          location: ${{ secrets.gc_compute_zone }}
+          service_account: ${{ secrets.gc_service_account }}
+          workload_identity_provider: ${{ secrets.gc_workload_identity_provider }}
+
+      - name: Deploy the Helm chart
+        run: |-
+          helm secrets upgrade ${{ inputs.helm_release-prefix }}-${{ env.HELM_RELEASE_NAMESPACE_SHORTHAND }} . \
+          --set dockerImageTag=${{ env.RELEASE_VERSION }} \
+          -f ./vars/${{ env.HELM_RELEASE_NAMESPACE_SHORTHAND }}/secrets.yml \
+          -f ./vars/${{ env.HELM_RELEASE_NAMESPACE_SHORTHAND }}/values.yml \
+          -f ./vars/secrets.yml \
+          -f ./vars/values.yml \
+          -n ${{ inputs.helm_release_namespace }}

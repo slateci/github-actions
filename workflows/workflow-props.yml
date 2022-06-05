@@ -1,0 +1,88 @@
+name: Workflow Properties
+
+on:
+  workflow_call:
+    inputs:
+      helm_release_namespace:
+        description: Kubernetes namespace corresponding to a Helm release, e.g. 'development'.
+        required: true
+        type: string
+      prod_git_ref:
+        description: The git ref to use when deployment to production, e.g. '/refs/tags/v1.0.4'.
+        required: false
+        type: string
+      python_version:
+        description: The version of Python to use, e.g. 3.9.
+        required: false
+        default: 3.9
+        type: string
+      repository:
+        description: The GitHub repository to clone, e.g. 'slateci/helm-slate-api'.
+        required: true
+        type: string
+
+jobs:
+  workflow-props:
+    name: Calculate Workflow Properties
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: "Chosen environment: development"
+        if: ${{ inputs.helm_release_namespace == 'development' }}
+        run: |-
+          echo "GIT_REF=refs/heads/develop" >> $GITHUB_ENV
+
+      - name: "Chosen environment: staging"
+        if: ${{ inputs.helm_release_namespace == 'staging' }}
+        run: |-
+          echo "GIT_REF=refs/heads/master" >> $GITHUB_ENV
+
+      - name: "Chosen environment: production"
+        if: ${{ inputs.helm_release_namespace == 'production' }}
+        run: |-
+          echo "GIT_REF=${{ inputs.prod_git_ref }}" >> $GITHUB_ENV
+
+      - name: Check out repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ env.GIT_REF }}
+          repository: ${{ inputs.repository }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ inputs.python_version }}
+          architecture: x64
+
+      - name: Install Python packages
+        uses: BSFishy/pip-action@v1
+        with:
+          packages: pyyaml
+
+      - name: Find Release Version
+        uses: jannekem/run-python-script-action@v1
+        with:
+          script: |
+            import yaml
+            
+            with open("Chart.yaml") as stream:
+              try:
+                data_loaded = yaml.safe_load(stream)
+              except yaml.YAMLError as ex:
+                raise ex
+              set_env("RELEASE_VERSION", data_loaded["appVersion"])
+
+      - name: Store Release Version
+        run: |-
+          echo "## Release Version" >> $GITHUB_STEP_SUMMARY
+          echo "${{ env.RELEASE_VERSION }}" >> $GITHUB_STEP_SUMMARY
+          echo "releaseVersion=${{ env.RELEASE_VERSION }}" >> workflow.properties
+
+      - name: Upload Workflow Properties
+        uses: actions/upload-artifact@v3
+        with:
+          name: shared-workflow-props
+          path: workflow.properties
+          if-no-files-found: error
+          retention-days: 1

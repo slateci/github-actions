@@ -1,0 +1,61 @@
+name: Set Up GCloud and Helm
+description: Authenticates with the Google Kubernetes Engine (GKE) and sets up Helm
+
+inputs:
+  cluster_name:
+    description: Name of the cluster for which to get credentials.
+    required: true
+  helm_version:
+    description: The version of Helm to use, e.g. 3.8.1.
+    required: false
+    default: 3.8.1
+  location:
+    description: Location (e.g. region or zone) in which the cluster resides.
+    required: true
+  service_account:
+    description: Email address or unique identifier of the Google Cloud service account for which to generate credentials.
+    required: true
+  sops_version:
+    description: The version of Mozilla SOPS to use when encrypting/decrypting, e.g 3.7.3.
+    required: false
+    default: 3.7.3
+  workload_identity_provider:
+    description: The full identifier of the Workload Identity Provider, including the project number, pool name, and provider name.
+    required: true
+
+runs:
+  using: composite
+
+  steps:
+    - id: auth
+      name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v0
+      with:
+        workload_identity_provider: ${{ inputs.workload_identity_provider }}
+        service_account: ${{ inputs.service_account }}
+
+    - id: get-credentials
+      name: Get GKE credentials
+      uses: google-github-actions/get-gke-credentials@v0
+      with:
+        cluster_name: ${{ inputs.cluster_name }}
+        location: ${{ inputs.location }}
+
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v0
+
+    - name: Install Helm
+      uses: azure/setup-helm@v2.1
+      with:
+        version: ${{ inputs.helm_version }}
+
+    - name: Install Helm plugins
+      run: |-
+        helm plugin install https://github.com/databus23/helm-diff
+        helm plugin install https://github.com/jkroepke/helm-secrets
+      shell: sh
+
+    - name: Install SOPS
+      uses: mdgreenwald/mozilla-sops-action@v1.2.0
+      with:
+        version: ${{ inputs.sops_version }}
