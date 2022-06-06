@@ -7,14 +7,6 @@ on:
         description: The path to the Dockerfile.
         required: true
         type: string
-      git_ref:
-        description: The branch or tag ref to check out, e.g. `refs/heads/develop`.
-        required: true
-        type: string
-      repository:
-        description: The GitHub repository to clone, e.g. 'slateci/helm-slate-api'.
-        required: true
-        type: string
 
 jobs:
   build:
@@ -29,9 +21,6 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          ref: ${{ inputs.git_ref }}
-          path: .
-          repository: ${{ inputs.repository }}
 
       - name: Build Docker image
         uses: docker/build-push-action@v3
