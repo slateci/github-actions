@@ -74,7 +74,7 @@ jobs:
         with:
           image: app-image:${{ github.sha }}
           exit-code: '0'
-          exit-level: WARN
+          exit-level: FATAL
 
   scan:
     name: Trivy Scan
