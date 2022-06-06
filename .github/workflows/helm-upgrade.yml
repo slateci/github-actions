@@ -11,10 +11,6 @@ on:
         description: The prefix used for the Helm release, e.g. 'slate-portal', 'slate-api'.
         required: true
         type: string
-      repository:
-        description: The GitHub repository to clone, e.g. 'slateci/helm-slate-api'.
-        required: true
-        type: string
       prod_git_ref:
         description: The git ref to use when deployment to production, e.g. '/refs/tags/v1.0.4'.
         required: false
@@ -76,9 +72,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          path: .
           ref: ${{ env.GIT_REF }}
-          repository: ${{ inputs.repository }}
 
       - name: Set Up Tools
         uses: slateci/github-actions/.github/actions/gcloud-helm-setup.yml@master
