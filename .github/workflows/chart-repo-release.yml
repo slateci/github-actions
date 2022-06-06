@@ -1,0 +1,41 @@
+name: Chart Repo Release
+
+on:
+  workflow_call:
+    inputs:
+      helm_version:
+        description: The version of Helm to use, e.g. 3.8.1.
+        required: false
+        default: 3.8.1
+        type: string
+
+    secrets:
+      github_token:
+        description: The automatically generated worfklow GitHub token.
+        required: true
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+
+      - name: Install Helm
+        uses: azure/setup-helm@v2.1
+        with:
+          version: ${{ inputs.helm_version }}
+
+      - name: Run chart-releaser
+        uses: helm/chart-releaser-action@v1.4.0
+        env:
+          CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
