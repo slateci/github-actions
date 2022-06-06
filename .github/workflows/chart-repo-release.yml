@@ -9,10 +9,7 @@ on:
         default: 3.8.1
         type: string
 
-    secrets:
-      github_token:
-        description: The automatically generated worfklow GitHub token.
-        required: true
+    secrets: inherit
 
 jobs:
   release:
