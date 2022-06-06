@@ -2,6 +2,11 @@ name: "Helm Chart: Diff/lint"
 
 on:
   workflow_call:
+    inputs:
+      helm_release_prefix:
+        description: The prefix used for the Helm release, e.g. 'slate-portal', 'slate-api'.
+        required: true
+        type: string
     secrets:
       gc_compute_zone:
         description: The Google Cloud Compute Zone where the assets reside.
@@ -42,7 +47,7 @@ jobs:
       - name: Diff the DEV chart
         if: ${{ github.ref }} == 'refs/heads/develop'
         run: |-
-          helm secrets diff upgrade slate-api-dev . \
+          helm secrets diff upgrade ${{ inputs.helm_release_prefix }}-dev . \
           -f ./vars/dev/secrets.yml \
           -f ./vars/dev/values.yml \
           -f ./vars/secrets.yml \
@@ -51,7 +56,7 @@ jobs:
 
       - name: Diff the STAGING chart
         run: |-
-          helm secrets diff upgrade slate-api-staging . \
+          helm secrets diff upgrade ${{ inputs.helm_release_prefix }}-staging . \
           -f ./vars/staging/secrets.yml \
           -f ./vars/staging/values.yml \
           -f ./vars/secrets.yml \
@@ -60,7 +65,7 @@ jobs:
 
       - name: Diff the PROD chart
         run: |-
-          helm secrets diff upgrade slate-api-prod . \
+          helm secrets diff upgrade ${{ inputs.helm_release_prefix }}-prod . \
           -f ./vars/prod/secrets.yml \
           -f ./vars/prod/values.yml \
           -f ./vars/secrets.yml \
