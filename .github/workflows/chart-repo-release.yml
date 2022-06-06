@@ -9,7 +9,10 @@ on:
         default: 3.8.1
         type: string
 
-    secrets: inherit
+    secrets:
+      cr_token:
+        description: The GitHub token of this repository.
+        required: true
 
 jobs:
   release:
@@ -35,4 +38,4 @@ jobs:
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.4.0
         env:
-          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          CR_TOKEN: "${{ secrets.cr_token }}"
