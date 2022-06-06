@@ -1,0 +1,86 @@
+name: Chart Repo Test
+
+on:
+  workflow_call:
+    inputs:
+      chart_yaml_schema:
+        description: The Chart.yaml schema file path.
+        required: false
+        default: chart_schema.yaml
+        type: string
+      config:
+        description: The config file path.
+        required: false
+        default: ct.yaml
+        type: string
+      git_ref:
+        description: The branch or tag ref to check out, e.g. `refs/heads/develop`.
+        required: true
+        type: string
+      helm_version:
+        description: The version of Helm to use, e.g. 3.8.1.
+        required: false
+        default: 3.8.1
+        type: string
+      lint_conf:
+        description: The YAML lint config file path.
+        required: false
+        default: lintconf.yaml
+        type: string
+      python_version:
+        description: The version of Python to use, e.g. 3.7.
+        required: false
+        default: 3.7
+        type: string
+      repository:
+        description: The GitHub repository to clone, e.g. 'slateci/helm-slate-api'.
+        required: true
+        type: string
+      target_branch:
+        description: The name of the target branch used to identify changed charts.
+        required: false
+        default: master
+        type: string
+
+env:
+  CT_chart_yaml_schema: ${{ inputs.chart_yaml_schema }}
+  CT_config: ${{ inputs.config }}
+  CT_lint_conf: ${{ inputs.lint_conf }}
+  CT_target_branch: ${{ inputs.target_branch }}
+
+jobs:
+  ct-lint:
+    name: Lint
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v2.1
+        with:
+          version: ${{ inputs.helm_version }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ inputs.python_version }}
+
+      - name: Set up chart-testing
+        uses: helm/chart-testing-action@v2.2.1
+
+      - name: Run chart-testing (list-changed)
+        id: list-changed
+        run: |
+          changed=$(ct list-changed)
+          charts=$(echo "$changed" | tr '\n' ' ' | xargs)
+          if [[ -n "$changed" ]]; then
+            echo "::set-output name=changed::true"
+            echo "::set-output name=changed_charts::$charts"
+          fi
+
+      - name: Run chart-testing (lint)
+        run: ct lint
