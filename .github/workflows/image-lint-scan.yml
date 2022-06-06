@@ -48,6 +48,7 @@ jobs:
         with:
           name: image
           path: /tmp/image.tar
+          retention-days: 1
 
   lint:
     name: Dockle Lint
