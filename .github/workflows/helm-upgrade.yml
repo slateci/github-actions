@@ -75,7 +75,7 @@ jobs:
           ref: ${{ env.GIT_REF }}
 
       - name: Set Up Tools
-        uses: slateci/github-actions/.github/actions/gcloud-helm-setup.yml@master
+        uses: slateci/github-actions/.github/actions/gcloud-helm-setup@master
         with:
           cluster_name: ${{ secrets.gc_gke_cluster }}
           location: ${{ secrets.gc_compute_zone }}
