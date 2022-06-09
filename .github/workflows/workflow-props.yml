@@ -27,24 +27,29 @@ jobs:
         if: ${{ inputs.helm_release_namespace == 'development' }}
         run: |-
           echo "GIT_REF=refs/heads/develop" >> $GITHUB_ENV
+          echo "HELM_RELEASE_NAMESPACE_SHORTHAND=dev" >> $GITHUB_ENV
 
       - name: "Chosen environment: staging"
         if: ${{ inputs.helm_release_namespace == 'staging' }}
         run: |-
           echo "GIT_REF=refs/heads/master" >> $GITHUB_ENV
+          echo "HELM_RELEASE_NAMESPACE_SHORTHAND=staging" >> $GITHUB_ENV
 
       - name: "Chosen environment: production"
         if: ${{ inputs.helm_release_namespace == 'production' }}
         run: |-
           echo "GIT_REF=${{ inputs.prod_git_ref }}" >> $GITHUB_ENV
+          echo "HELM_RELEASE_NAMESPACE_SHORTHAND=prod" >> $GITHUB_ENV
 
       - name: Check out repo
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+          path: .
+          ref: ${{ env.GIT_REF }}
 
       - name: Set up Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ inputs.python_version }}
 
@@ -66,10 +71,13 @@ jobs:
                 raise ex
               set_env("RELEASE_VERSION", data_loaded["appVersion"])
 
-      - name: Store Release Version
+      - name: Store Workflow Properties
         run: |-
           echo "## Release Version" >> $GITHUB_STEP_SUMMARY
           echo "${{ env.RELEASE_VERSION }}" >> $GITHUB_STEP_SUMMARY
+          
+          echo "gitRef=${{ env.GIT_REF }}" >> workflow.properties
+          echo "helmReleaseNamespaceShorthand=${{ env.HELM_RELEASE_NAMESPACE_SHORTHAND }}" >> workflow.properties
           echo "releaseVersion=${{ env.RELEASE_VERSION }}" >> workflow.properties
 
       - name: Upload Workflow Properties

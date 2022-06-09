@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import os
 import logging
 import subprocess
@@ -5,16 +7,14 @@ import semver
 import yaml
 from yaml.loader import SafeLoader
 
-# os.environ.get(namespace, namespaceshorthand, helmreleaseprefix, etc..)
-
 # Log all the things:
 logging.getLogger().setLevel(logging.DEBUG)
 
 if __name__ == '__main__':
-    chart_filepath = '/path/to/Chart.yaml'
-    helm_release_namespace = 'development'
-    helm_release_namespace_shorthand = 'dev'
-    helm_release_prefix = 'slate-api'
+    discovered_appversion = os.environ.get('RELEASE_VERSION')
+    helm_release_namespace = os.environ.get('HELM_RELEASE_NAMESPACE')
+    helm_release_namespace_shorthand = os.environ.get('HELM_RELEASE_NAMESPACE_SHORTHAND')
+    helm_release_prefix = os.environ.get('HELM_RELEASE_PREFIX')
 
     command = [
         'helm', 'list',
@@ -41,13 +41,7 @@ if __name__ == '__main__':
         raise ex
 
     logging.info("Discovering appVersion from source...")
-    with open(chart_filepath) as stream:
-        try:
-            data_loaded = yaml.load(stream, Loader=SafeLoader)
-            discovered_appversion = data_loaded['appVersion']
-            logging.info(f"Found appVersion in Chart.yaml: {discovered_appversion}")
-        except yaml.YAMLError as ex:
-            raise ex
+    logging.info(f"Found appVersion from source: {discovered_appversion}")
 
     logging.info("Verifying newer appVersion...")
     # deployed_appversion_parsed = semver.VersionInfo.parse(deployed_appversion)
