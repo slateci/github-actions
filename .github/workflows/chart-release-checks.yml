@@ -35,8 +35,8 @@ on:
         required: true
 
 jobs:
-  checks:
-    name: Checks
+  semver:
+    name: Semver Checks
     runs-on: ubuntu-20.04
 
     permissions:
