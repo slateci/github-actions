@@ -1,5 +1,21 @@
 #!/usr/bin/env python
 
+"""
+This is a script to return an :func:`Exception` if a deployed semantic version is newer than
+its counterpart in the repository's ``Chart.yaml``, specifically the ``appVersion`` metadata.
+
+For simplicity this script uses system environmental variables as inputs including the following:
+
+* ``RELEASE_VERSION``: derived from the repository's ``Chart.yaml``, specifically the ``appVersion``
+  metadata (calculated by the GitHub workflow).
+* ``HELM_RELEASE_NAMESPACE``: specified as input to the GitHub workflow.
+* ``HELM_RELEASE_NAMESPACE_SHORTHAND``: derived from ``HELM_RELEASE_NAMESPACE`` by the GitHub workflow.
+* ``HELM_RELEASE_PREFIX``: specified as input to the GitHub workflow.
+
+Additionally, the tools installed and configured by the GitHub composite action
+``gcloud-helm-setup/action.yml`` are required.
+"""
+
 import os
 import logging
 import subprocess
