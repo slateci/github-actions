@@ -39,6 +39,10 @@ jobs:
     name: Checks
     runs-on: ubuntu-20.04
 
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
       - name: Download Shared Workflow Properties
         uses: actions/download-artifact@v3
