@@ -41,13 +41,7 @@ if __name__ == '__main__':
         raise ex
 
     logging.info("Discovering appVersion from source...")
-    with open(chart_filepath) as stream:
-        try:
-            data_loaded = yaml.load(stream, Loader=SafeLoader)
-            discovered_appversion = data_loaded['appVersion']
-            logging.info(f"Found appVersion in Chart.yaml: {discovered_appversion}")
-        except yaml.YAMLError as ex:
-            raise ex
+    logging.info(f"Found appVersion from source: {discovered_appversion}")
 
     logging.info("Verifying newer appVersion...")
     # deployed_appversion_parsed = semver.VersionInfo.parse(deployed_appversion)
