@@ -35,8 +35,8 @@ on:
         required: true
 
 jobs:
-  checks:
-    name: Checks
+  semver:
+    name: Semver Checks
     runs-on: ubuntu-20.04
 
     permissions:
@@ -76,7 +76,7 @@ jobs:
             pyyaml
             semver
 
-      - name: Compare Expected Release Versions (just Prod)
+      - name: Compare Expected Release Versions (Prod)
         if: ${{ inputs.helm_release_namespace == 'production' }}
         uses: jannekem/run-python-script-action@v1
         with:
