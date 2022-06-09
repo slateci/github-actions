@@ -76,7 +76,7 @@ jobs:
             pyyaml
             semver
 
-      - name: Compare Expected Release Versions (just Prod)
+      - name: Compare Expected Release Versions (Prod)
         if: ${{ inputs.helm_release_namespace == 'production' }}
         uses: jannekem/run-python-script-action@v1
         with:
