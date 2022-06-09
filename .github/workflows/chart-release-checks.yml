@@ -52,13 +52,6 @@ jobs:
           echo "HELM_RELEASE_NAMESPACE_SHORTHAND=${helmReleaseNamespaceShorthand}" >> $GITHUB_ENV
           echo "RELEASE_VERSION=${releaseVersion}" >> $GITHUB_ENV
 
-      - name: Check out repo
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          path: .
-          ref: ${{ env.GIT_REF }}
-
       - name: Set Up Tools
         uses: slateci/github-actions/.github/actions/gcloud-helm-setup@master
         with:
@@ -94,5 +87,5 @@ jobs:
         run: |-
           export HELM_RELEASE_NAMESPACE=${{ inputs.helm_release_namespace }}
           export HELM_RELEASE_PREFIX=${{ inputs.helm_release_prefix }}
-          curl -LO https://raw.githubusercontent.com/slateci/github-actions/develop/scripts/semver-health.py
+          curl -LO https://raw.githubusercontent.com/slateci/github-actions/master/scripts/semver-health.py
           python semver-health.py
