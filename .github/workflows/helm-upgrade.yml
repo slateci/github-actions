@@ -7,7 +7,7 @@ on:
         description: Kubernetes namespace corresponding to a Helm release, e.g. 'development'.
         required: true
         type: string
-      helm_release-prefix:
+      helm_release_prefix:
         description: The prefix used for the Helm release, e.g. 'slate-portal', 'slate-api'.
         required: true
         type: string
@@ -69,7 +69,7 @@ jobs:
 
       - name: Deploy the Helm chart
         run: |-
-          helm secrets upgrade ${{ inputs.helm_release-prefix }}-${{ env.HELM_RELEASE_NAMESPACE_SHORTHAND }} . \
+          helm secrets upgrade ${{ inputs.helm_release_prefix }}-${{ env.HELM_RELEASE_NAMESPACE_SHORTHAND }} . \
           --set dockerImageTag=${{ env.RELEASE_VERSION }} \
           -f ./vars/${{ env.HELM_RELEASE_NAMESPACE_SHORTHAND }}/secrets.yml \
           -f ./vars/${{ env.HELM_RELEASE_NAMESPACE_SHORTHAND }}/values.yml \
