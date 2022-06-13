@@ -1,9 +1,10 @@
+import os
 import sys
 
 import requests
 import jinja2
 
-GITHUB_URL = "https://api.github.com/repos/slateci/atlas-squid/commits"
+GITHUB_API_COMMIT_ENDPOINT = os.environ.get('GITHUB_API_COMMIT_ENDPOINT')
 
 
 def get_cluster(instance_dir: str = None) -> str:
@@ -28,7 +29,7 @@ def get_git_commit(commit_id: str = None) -> dict:
     :param commit_id: sha hash for commit
     :return: dict with json response
     """
-    r = requests.get(f"{GITHUB_URL}/{commit_id}",
+    r = requests.get(f"{GITHUB_API_COMMIT_ENDPOINT}/{commit_id}",
                      data={"accept": "application/vnd.github.v3+json"})
     if r.status_code != requests.codes.ok:
         sys.stderr.write(f"Can't get commit {commit_id} got HTTP code {r.status_code}: {r.text}\n")
@@ -50,7 +51,7 @@ def get_prior_commit(commit_id: str = None) -> dict:
     :param commit_id: sha hash of merge commit
     :return: dict with json response
     """
-    r = requests.get(f"{GITHUB_URL}",
+    r = requests.get(f"{GITHUB_API_COMMIT_ENDPOINT}",
                      data={"accept": "application/vnd.github.v3+json"})
     if r.status_code != requests.codes.ok:
         sys.stderr.write(f"Can't get commits got HTTP code {r.status_code}: {r.text}\n")
