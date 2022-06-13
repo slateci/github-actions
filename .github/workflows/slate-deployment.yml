@@ -71,12 +71,22 @@ jobs:
         run: |-
           curl -fsSL https://raw.githubusercontent.com/slateci/github-actions/feature/6_add-slate-instance-gitops/scripts/generate-mail-body.py -o generate-mail-body.py
           curl -fsSL https://raw.githubusercontent.com/slateci/github-actions/feature/6_add-slate-instance-gitops/scripts/mailgun.py -o mailgun.py
-          curl -fsSL https://raw.githubusercontent.com/slateci/github-actions/feature/6_add-slate-instance-gitops/scripts/slate-instance-push-updates.py -o PushUpdates.py
+          curl -fsSL https://raw.githubusercontent.com/slateci/github-actions/feature/6_add-slate-instance-gitops/scripts/slate-instance-push-updates.py -o slate-instance-push-updates.py
 
       - name: Deploy to SLATE
-        working-directory: ./checkout
         run: |-
-          echo "Doing stuff..."
+          BEFORE="${{ github.event.before }}"
+          AFTER="${{ github.event.after }}"
+          # https://stackoverflow.com/questions/40883798/how-to-get-git-diff-of-the-first-commit
+          if [[ $BEFORE = "0000000000000000000000000000000000000000" ]]; then
+            BEFORE="4b825dc642cb6eb9a060e54bf8d69288fbee4904"
+          fi
+          if [[ $AFTER = "0000000000000000000000000000000000000000" ]]; then
+            AFTER="4b825dc642cb6eb9a060e54bf8d69288fbee4904"
+          fi
+          git diff --name-status --pretty="format:" "$BEFORE" "$AFTER" > .changed
+          DEBUG="TRUE"
+          python slate-instance-push-updates.py ".changed" "${{ secrets.SLATE_API_TOKEN }}"
 
       - name: Commit SLATE Instance ID
         if: ${{ steps.deploy.outputs.push == 'true' }}
