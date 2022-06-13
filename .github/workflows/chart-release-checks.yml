@@ -91,5 +91,5 @@ jobs:
         run: |-
           export HELM_RELEASE_NAMESPACE=${{ inputs.helm_release_namespace }}
           export HELM_RELEASE_PREFIX=${{ inputs.helm_release_prefix }}
-          curl -LO https://raw.githubusercontent.com/slateci/github-actions/master/scripts/semver-health.py
+          curl -fsSL https://raw.githubusercontent.com/slateci/github-actions/master/scripts/semver-health.py -o semver-health.py
           python semver-health.py
