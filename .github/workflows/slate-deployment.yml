@@ -1,0 +1,80 @@
+name: SLATE Deployment
+
+on:
+  workflow_call:
+    inputs:
+      email_changes:
+        description: Whether or not to email changes to the maintainers.
+        required: false
+        default: true
+        type: boolean
+      python_version:
+        description: The version of Python to use, e.g. 3.9.
+        required: false
+        default: 3.9
+        type: string
+
+
+jobs:
+  deploy:
+    name: Deploy SLATE Instance
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          path: .
+
+      - name: Configure Git
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ inputs.python_version }}
+
+      - name: Install Python packages
+        uses: BSFishy/pip-action@v1
+        with:
+          packages: |
+            requests
+
+      - name: Download automation script
+        run: |-
+          curl -fsSL https://raw.githubusercontent.com/slateci/github-actions/feature/6_add-slate-instance-gitops/scripts/slate-instance-push-updates.py -o PushUpdates.py
+
+      - name: Deploy to SLATE
+        run: |-
+          echo "Doing stuff..."
+          
+      - name: Email Changes
+        if: ${{ steps.deploy.outputs.push == 'true' && inputs.email_changes }}
+        run: |-
+          echo -n "$MAILGUN_SEND_TO"
+          | xargs -r -d',' printf -- '-F to="%s"\0'
+          | xargs -r0
+          curl -s --user "api:${MAILGUN_API_KEY}"
+          https://api.mailgun.net/v3/${MAILGUN_DOMAIN}/messages
+          -F from="$MAILGUN_FROM"
+          -F subject="$MAILGUN_SUBJECT"
+          -F text="Here's the diff of changes made:\n\n${MAILGUN_BODY}"
+        env:
+          MAILGUN_SUBJECT: "SLATE GitOps Change Summary"
+          MAILGUN_BODY: "${{ steps.deploy.outputs.DIFF_OUTPUT }}"
+          # fill these out appropriately
+          MAILGUN_API_KEY: ${{ secrets.MAILGUN_API_KEY }}
+          MAILGUN_DOMAIN: foo.edu
+          MAILGUN_FROM: "Foo Bar <bar@foo.edu>"
+        # this can be a comma delimited list
+        MAILGUN_SEND_TO: foo@bar.com,hello@world.com
+
+      - name: Commit SLATE Instance ID
+        if: ${{ steps.deploy.outputs.push == 'true' }}
+        run: |-
+          git add .
+          git commit -m "append new SLATE instance ID" --allow-empty
+          git push
