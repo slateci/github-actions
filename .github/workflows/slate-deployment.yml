@@ -58,6 +58,11 @@ jobs:
       - name: YAML Lint
         uses: ibiqlik/action-yamllint@v3
         with:
+          config_data: |
+            extends: default
+            rules:
+              line-length:
+                level: warning
           file_or_dir: ./*/values.yaml ./*/values.yml ./*/instance.yaml ./*/instance.yml
           strict: true
 
