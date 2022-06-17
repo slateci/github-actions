@@ -27,6 +27,11 @@ on:
         required: false
         default: "SLATE GitOps Change Summary"
         type: string
+      slate_api_endpoint:
+        description: The SLATE API endpoint.
+        required: false
+        default: "https://api.slateci.io"
+        type: string
       python_version:
         description: The version of Python to use, e.g. 3.9.
         required: false
@@ -73,20 +78,24 @@ jobs:
           curl -fsSL https://raw.githubusercontent.com/slateci/github-actions/feature/6_add-slate-instance-gitops/scripts/mailgun.py -o mailgun.py
           curl -fsSL https://raw.githubusercontent.com/slateci/github-actions/feature/6_add-slate-instance-gitops/scripts/slate-instance-push-updates.py -o slate-instance-push-updates.py
 
-      - name: Deploy to SLATE
+      - id: deploy
+        name: Deploy to SLATE
+        working-directory: ./checkout
         run: |-
           BEFORE="${{ github.event.before }}"
           AFTER="${{ github.event.after }}"
           # https://stackoverflow.com/questions/40883798/how-to-get-git-diff-of-the-first-commit
           if [[ $BEFORE = "0000000000000000000000000000000000000000" ]]; then
+            # Use the empty tree id in Git
             BEFORE="4b825dc642cb6eb9a060e54bf8d69288fbee4904"
           fi
           if [[ $AFTER = "0000000000000000000000000000000000000000" ]]; then
+            # Use the empty tree id in Git
             AFTER="4b825dc642cb6eb9a060e54bf8d69288fbee4904"
           fi
-          git diff --name-status --pretty="format:" "$BEFORE" "$AFTER" > .changed
-          DEBUG="TRUE"
-          python slate-instance-push-updates.py ".changed" "${{ secrets.SLATE_API_TOKEN }}"
+          git diff --name-status --pretty="format:" "$BEFORE" "$AFTER" > ../.changed
+          echo "::set-output name=DIFF_OUTPUT::$(git diff "$BEFORE" "$AFTER")"
+          python ../slate-instance-push-updates.py "../.changed" "${{ secrets.SLATE_API_TOKEN }}" "$ {{ inputs.slate_api_endpoint }}"
 
       - name: Commit SLATE Instance ID
         if: ${{ steps.deploy.outputs.push == 'true' }}
@@ -107,7 +116,7 @@ jobs:
           MAILGUN_SEND_TO: "${{ inputs.mailgun_send_to }}"
         run: |-
           mkdir -p ./templates
-          curl -fsSL https://raw.githubusercontent.com/slateci/github-actions/feature/6_add-slate-instance-gitops/templates/email_template_html.jinja -o email_template_html.jinja
-          curl -fsSL https://raw.githubusercontent.com/slateci/github-actions/feature/6_add-slate-instance-gitops/templates/email_template_text.jinja -o email_template_text.jinja
+          curl -fsSL https://raw.githubusercontent.com/slateci/github-actions/feature/6_add-slate-instance-gitops/templates/email_template_html.jinja -o email_template_html.j2
+          curl -fsSL https://raw.githubusercontent.com/slateci/github-actions/feature/6_add-slate-instance-gitops/templates/email_template_text.jinja -o email_template_text.j2
           python generate_mail_body.py ${{ github.event.after }}
           python mailgun.py

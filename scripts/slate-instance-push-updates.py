@@ -64,7 +64,7 @@ def add_instance() -> bool:
     """
     Add an instance to slate api server
 
-    :return: None
+    :return: bool
     """
     try:
         instanceDetails = open(f"{containerName}/instance.yaml", "r").readlines()
@@ -216,11 +216,6 @@ for Entry in ChangedFiles:
             continue
         instanceID = instanceConfig["instance"]
         valuesString = open(containerName + "/" + "values.yaml", "r").read()
-        # Using port 443 goes to the nginx proxy in front of the api server
-        # using this in gh actions often results in a timeout,
-        # we only need to use the proxy to talk to the api server from
-        # facilities like TACC
-        # uri = "https://api.slateci.io:443/v1alpha3/instances/" + instanceID + "/update"
         uri = f"{slateAPIEndpoint}/v1alpha3/instances/{instanceID}/update"
         logging.debug(f"Contacting {uri}")
         response = requests.put(
