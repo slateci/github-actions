@@ -91,8 +91,8 @@ jobs:
         uses: BSFishy/pip-action@v1
         with:
           packages: |
-            jinja2
-            requests
+            jinja2====3.1.2
+            requests==2.27.1
 
       - name: Download workflow scripts
         run: |-
