@@ -42,7 +42,9 @@ on:
       mailgun_api_key:
         description: The API key used to send email via the Mailgun service.
         required: false
-
+      slate_api_token:
+        description: The SLATE API token used to communicate with the SLATE API endpoint.
+        required: true
 jobs:
   lint:
     name: Lint
