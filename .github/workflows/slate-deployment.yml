@@ -41,7 +41,7 @@ on:
     secrets:
       mailgun_api_key:
         description: The API key used to send email via the Mailgun service.
-        required: true
+        required: false
 
 jobs:
   lint:
