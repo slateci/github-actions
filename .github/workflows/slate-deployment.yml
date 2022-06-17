@@ -76,6 +76,7 @@ jobs:
       - name: Check out repo
         uses: actions/checkout@v3
         with:
+          fetch-depth: 0
           path: ./checkout
 
       - name: Configure Git
