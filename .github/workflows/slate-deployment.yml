@@ -44,8 +44,8 @@ on:
         required: true
 
 jobs:
-  deploy:
-    name: Deploy SLATE Instance
+  lint:
+    name: Lint
     runs-on: ubuntu-20.04
 
     steps:
@@ -53,6 +53,23 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+          path: .
+
+      - name: YAML Lint
+        uses: ibiqlik/action-yamllint@v3
+        with:
+          file_or_dir: ./*/values.yaml ./*/values.yml ./*/instance.yaml ./*/instance.yml
+          strict: true
+
+  deploy:
+    name: Deploy SLATE Instance
+    runs-on: ubuntu-20.04
+    needs: lint
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+        with:
           path: ./checkout
 
       - name: Configure Git
