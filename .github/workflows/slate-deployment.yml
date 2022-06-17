@@ -107,12 +107,11 @@ jobs:
           BEFORE="${{ github.event.before }}"
           AFTER="${{ github.event.after }}"
           # https://stackoverflow.com/questions/40883798/how-to-get-git-diff-of-the-first-commit
+          # Use the empty tree id in Git if necessary
           if [[ $BEFORE = "0000000000000000000000000000000000000000" ]]; then
-            # Use the empty tree id in Git
             BEFORE="4b825dc642cb6eb9a060e54bf8d69288fbee4904"
           fi
           if [[ $AFTER = "0000000000000000000000000000000000000000" ]]; then
-            # Use the empty tree id in Git
             AFTER="4b825dc642cb6eb9a060e54bf8d69288fbee4904"
           fi
           git diff --name-status --pretty="format:" "$BEFORE" "$AFTER" > ../.changed
