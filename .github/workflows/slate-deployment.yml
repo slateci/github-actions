@@ -63,8 +63,7 @@ jobs:
             rules:
               line-length:
                 level: warning
-          file_or_dir: ./*/values.yaml ./*/values.yml ./*/instance.yaml ./*/instance.yml
-          strict: true
+          file_or_dir: ./*/values.yaml ./*/instance.yaml
 
   deploy:
     name: Deploy SLATE Instance
