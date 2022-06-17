@@ -104,19 +104,23 @@ jobs:
         name: Deploy to SLATE
         working-directory: ./checkout
         run: |-
-          BEFORE="${{ github.event.before }}"
           AFTER="${{ github.event.after }}"
+          BEFORE="${{ github.event.before }}"
+          DEBUG="TRUE"
+          EMPTY_TREE_ID="4b825dc642cb6eb9a060e54bf8d69288fbee4904"
+          ZERO_TREE_ID="0000000000000000000000000000000000000000"
+          
           # https://stackoverflow.com/questions/40883798/how-to-get-git-diff-of-the-first-commit
-          # Use the empty tree id in Git if necessary
-          if [[ $BEFORE = "0000000000000000000000000000000000000000" ]]; then
-            BEFORE="4b825dc642cb6eb9a060e54bf8d69288fbee4904"
+          if [[ $BEFORE = $ZERO_TREE_ID ]]; then
+            BEFORE=$EMPTY_TREE_ID
           fi
-          if [[ $AFTER = "0000000000000000000000000000000000000000" ]]; then
-            AFTER="4b825dc642cb6eb9a060e54bf8d69288fbee4904"
+          
+          if [[ $AFTER = $ZERO_TREE_ID ]]; then
+            AFTER=$EMPTY_TREE_ID
           fi
+          
           git diff --name-status --pretty="format:" "$BEFORE" "$AFTER" > ../.changed
-          echo "::set-output name=DIFF_OUTPUT::$(git diff "$BEFORE" "$AFTER")"
-          python ../slate-instance-push-updates.py "../.changed" "${{ secrets.SLATE_API_TOKEN }}" "$ {{ inputs.slate_api_endpoint }}"
+          python ../slate-instance-push-updates.py "../.changed" "${{ secrets.SLATE_API_TOKEN }}" "${{ inputs.slate_api_endpoint }}"
 
       - name: Commit SLATE Instance ID
         if: ${{ steps.deploy.outputs.push == 'true' }}
