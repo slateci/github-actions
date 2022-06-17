@@ -77,6 +77,7 @@ def get_prior_commit(commit_id: str = None) -> dict:
             prior_commit["message"] = commit["commit"]["message"]
             old_commit_info = get_git_commit(commit["sha"])
             prior_commit["files"] = old_commit_info["files"]
+            prior_commit["commit_url"] = commit["html_url"]
             break
     return prior_commit
 
@@ -97,6 +98,7 @@ def create_mail(commit_id: str = None) -> None:
         prior_commit_info = get_prior_commit(commit_id)
         commit_vars["message"] = prior_commit_info["message"]
         commit_vars["files"] = prior_commit_info["files"]
+        commit_vars["commit_url"] = prior_commit_info["commit_url"]
 
     change_size = 0
     sites_changed = set()
