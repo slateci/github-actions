@@ -1,9 +1,12 @@
+#!/usr/bin/env python
+
 """
 Python script used by Git Actions automation to apply changes to SLATE instances
 described by a Git repository.
 
 Originally written by Mitchell Steinman
 """
+
 import os
 import sys
 import time
@@ -14,6 +17,7 @@ import requests
 
 PathToChangedFiles = sys.argv[1]
 slateToken = sys.argv[2]
+slateAPIEndpoint = sys.argv[3]
 
 if 'DEBUG' in os.environ and os.environ['DEBUG'] == 'TRUE':
     logging.basicConfig(level=logging.DEBUG)
@@ -36,7 +40,7 @@ def get_instance_id(cluster: str, app: str, retries: int = None) -> Optional[str
     else:
         current_retries = retries
     while current_retries > 0:
-        uri = "https://api.slateci.io:443/v1alpha3/instances"
+        uri = f"{slateAPIEndpoint}/v1alpha3/instances"
         response = requests.post(uri,
                                  params={"token": slateToken, "cluster": cluster},
                                  json={"apiVersion": "v1alpha3", "cluster": cluster})
@@ -97,7 +101,7 @@ def add_instance() -> bool:
     # we only need to use the proxy to talk to the api server from
     # facilities like TACC
     # uri = "https://api.slateci.io:443/v1alpha3/apps/" + appName
-    uri = "https://api.slateci.io:18080/v1alpha3/apps/" + appName
+    uri = f"{slateAPIEndpoint}/v1alpha3/apps/" + appName
     logging.debug(f"Contacting {uri}")
     response = requests.post(
         uri,
@@ -217,7 +221,7 @@ for Entry in ChangedFiles:
         # we only need to use the proxy to talk to the api server from
         # facilities like TACC
         # uri = "https://api.slateci.io:443/v1alpha3/instances/" + instanceID + "/update"
-        uri = f"https://api.slateci.io:18080/v1alpha3/instances/{instanceID}/update"
+        uri = f"{slateAPIEndpoint}/v1alpha3/instances/{instanceID}/update"
         logging.debug(f"Contacting {uri}")
         response = requests.put(
             uri,
