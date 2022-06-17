@@ -121,7 +121,7 @@ def create_mail(commit_id: str = None) -> None:
         sites_changed.add(get_cluster(instance_dir))
     commit_vars['change_size'] = change_size
     commit_vars['sites'] = list(sites_changed)
-    env = jinja2.Environment(loader=jinja2.FileSystemLoader(searchpath="./templates"))
+    env = jinja2.Environment(loader=jinja2.FileSystemLoader(searchpath="../templates"))
     text_body = env.get_template('email_template_text.j2')
     html_body = env.get_template('email_template_html.j2')
     with open('text_body', 'w') as f:
