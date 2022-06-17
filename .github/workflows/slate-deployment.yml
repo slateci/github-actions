@@ -146,5 +146,5 @@ jobs:
           mkdir -p ./templates
           curl -fsSL https://raw.githubusercontent.com/slateci/github-actions/feature/6_add-slate-instance-gitops/templates/email_template_html.j2 -o ./templates/email_template_html.j2
           curl -fsSL https://raw.githubusercontent.com/slateci/github-actions/feature/6_add-slate-instance-gitops/templates/email_template_text.j2 -o ./templates/email_template_text.j2
-          python generate_mail_body.py ${{ github.event.after }}
+          python generate-mail-body.py ${{ github.event.after }}
           python mailgun.py
