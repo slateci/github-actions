@@ -1,12 +1,17 @@
+#!/usr/bin/env python
+
 """
 Python script to send out emails using mailgun, looks at the environment for the
 following parameters:
+
 MAILGUN_SUBJECT: SLATE GitOps Change Summary
 MAILGUN_BODY: body of text
 MAILGUN_API_KEY: mailgun api key
 MAILGUN_DOMAIN: slateci.io
 MAILGUN_FROM: GitOps Notification <noreply@slateci.io>
 MAILGUN_SEND_TO: comma separated list of recipients
+
+Originally written by Suchandra Thapa
 """
 import os
 import sys

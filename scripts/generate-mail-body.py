@@ -1,3 +1,12 @@
+#!/usr/bin/env python
+
+"""
+Python script used by Git Actions automation to generate the body of the email to be
+sent using mailgun.
+
+Originally written by Suchandra Thapa
+"""
+
 import os
 import sys
 
