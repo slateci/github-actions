@@ -20,7 +20,7 @@ on:
         type: string
       mailgun_send_to:
         description: The comma-delimited "send to" list to use when sending emails.
-        required: true
+        required: false
         type: string
       mailgun_subject:
         description: The subject line to use when sending emails.
