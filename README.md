@@ -1,5 +1,7 @@
 # github-actions
 
+[![License: Unlicense](https://img.shields.io/badge/license-Unlicense-blue.svg)](http://unlicense.org/)
+
 This repository contains GitHub Actions, Workflows, etc. used by the different SLATECI repositories.
 
 ## Resources
