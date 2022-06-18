@@ -42,7 +42,7 @@ on:
         required: true
 
 env:
-  SLATE_GITHUB_ACTIONS_BRANCH: feature/6_add-slate-instance-gitops
+  SLATE_GITHUB_ACTIONS_BRANCH: master
   SLATE_GITHUB_ACTIONS_RAWCONTENT_URL: https://raw.githubusercontent.com/slateci/github-actions
 
 jobs:
