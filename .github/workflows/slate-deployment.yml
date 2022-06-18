@@ -140,6 +140,8 @@ jobs:
         if: ${{ steps.deploy.outputs.push == 'true' }}
         working-directory: ./checkout
         run: |-
+          git fetch
+          git pull
           git add .
           git commit -m "append new SLATE instance ID" --allow-empty
           git push
