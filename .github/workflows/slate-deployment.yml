@@ -1,4 +1,6 @@
 name: SLATE Deployment
+concurrency:
+  group: sd-${{ github.repository }}-${{ github.ref_name }}
 
 on:
   workflow_call:
