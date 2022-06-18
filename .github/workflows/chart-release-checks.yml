@@ -20,6 +20,7 @@ on:
         description: The expected production release semantic version, e.g. '1.0.0'.
         required: false
         type: string
+
     secrets:
       gc_compute_zone:
         description: The Google Cloud Compute Zone where the assets reside.
@@ -33,6 +34,10 @@ on:
       gc_workload_identity_provider:
         description: The Google Cloud Workload Identity Provider (WIP).
         required: true
+
+env:
+  SLATE_GITHUB_ACTIONS_BRANCH: master
+  SLATE_GITHUB_ACTIONS_RAWCONTENT_URL: https://raw.githubusercontent.com/slateci/github-actions
 
 jobs:
   semver:
@@ -73,8 +78,8 @@ jobs:
         uses: BSFishy/pip-action@v1
         with:
           packages: |
-            pyyaml
-            semver
+            pyyaml==6.0
+            semver==2.13.0
 
       - name: Compare Expected Release Versions (Prod)
         if: ${{ inputs.helm_release_namespace == 'production' }}
@@ -88,8 +93,9 @@ jobs:
               raise Exception("The source appVersion in Chart.yaml does not match chosen release version.")
 
       - name: Compare Deployed & Source Release Versions
+        env:
+          HELM_RELEASE_NAMESPACE: ${{ inputs.helm_release_namespace }}
+          HELM_RELEASE_PREFIX: ${{ inputs.helm_release_prefix }}
         run: |-
-          export HELM_RELEASE_NAMESPACE=${{ inputs.helm_release_namespace }}
-          export HELM_RELEASE_PREFIX=${{ inputs.helm_release_prefix }}
-          curl -LO https://raw.githubusercontent.com/slateci/github-actions/master/scripts/semver-health.py
+          curl -fsSL ${{ env.SLATE_GITHUB_ACTIONS_RAWCONTENT_URL }}/${{ env.SLATE_GITHUB_ACTIONS_BRANCH }}/scripts/semver-health.py -o semver-health.py
           python semver-health.py

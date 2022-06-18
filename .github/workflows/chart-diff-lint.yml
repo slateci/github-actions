@@ -7,6 +7,7 @@ on:
         description: The prefix used for the Helm release, e.g. 'slate-portal', 'slate-api'.
         required: true
         type: string
+
     secrets:
       gc_compute_zone:
         description: The Google Cloud Compute Zone where the assets reside.

@@ -1,0 +1,157 @@
+name: SLATE Deployment
+
+on:
+  workflow_call:
+    inputs:
+      mailgun_domain:
+        description: The domain associated with the Mailgun service.
+        required: false
+        default: slateci.io
+        type: string
+      mailgun_from:
+        description: The from value to use when sending emails.
+        required: false
+        default: "GitOps Notification <noreply@slateci.io>"
+        type: string
+      mailgun_send_to:
+        description: The comma-delimited "send to" list to use when sending emails.
+        required: true
+        type: string
+      mailgun_subject:
+        description: The subject line to use when sending emails.
+        required: false
+        default: "SLATE GitOps Change Summary"
+        type: string
+      slate_api_endpoint:
+        description: The SLATE API endpoint.
+        required: false
+        default: "https://api.slateci.io"
+        type: string
+      python_version:
+        description: The version of Python to use, e.g. 3.9.
+        required: false
+        default: 3.9
+        type: string
+
+    secrets:
+      mailgun_api_key:
+        description: The API key used to send email via the Mailgun service.
+        required: true
+      slate_api_token:
+        description: The SLATE API token used to communicate with the SLATE API endpoint.
+        required: true
+
+env:
+  SLATE_GITHUB_ACTIONS_BRANCH: master
+  SLATE_GITHUB_ACTIONS_RAWCONTENT_URL: https://raw.githubusercontent.com/slateci/github-actions
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          path: .
+
+      - name: YAML Lint
+        uses: ibiqlik/action-yamllint@v3
+        with:
+          config_data: |
+            extends: default
+            rules:
+              line-length:
+                level: warning
+          file_or_dir: ./*/values.yaml ./*/instance.yaml
+
+  deploy:
+    name: Deploy SLATE Instance
+    runs-on: ubuntu-20.04
+    needs: lint
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          path: ./checkout
+
+      - name: Configure Git
+        working-directory: ./checkout
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ inputs.python_version }}
+
+      - name: Install Python packages
+        uses: BSFishy/pip-action@v1
+        with:
+          packages: |
+            jinja2==3.1.2
+            requests==2.27.1
+
+      - name: Download workflow dependencies
+        run: |-
+          # Python files
+          for FILENAME in generate-mail-body.py mailgun.py slate-instance-push-updates.py
+          do
+            curl -fsSL ${{ env.SLATE_GITHUB_ACTIONS_RAWCONTENT_URL }}/${{ env.SLATE_GITHUB_ACTIONS_BRANCH }}/scripts/$FILENAME -o $FILENAME
+          done
+          
+          # Jinja2 templates
+          mkdir -p ./templates
+          for FILENAME in email_template_html.j2 email_template_text.j2
+          do
+            curl -fsSL ${{ env.SLATE_GITHUB_ACTIONS_RAWCONTENT_URL }}/${{ env.SLATE_GITHUB_ACTIONS_BRANCH }}/templates/$FILENAME -o ./templates/$FILENAME
+          done
+
+      - id: deploy
+        name: Deploy to SLATE
+        working-directory: ./checkout
+        run: |-
+          AFTER="${{ github.event.after }}"
+          BEFORE="${{ github.event.before }}"
+          DEBUG="TRUE"
+          EMPTY_TREE_ID="4b825dc642cb6eb9a060e54bf8d69288fbee4904"
+          ZERO_TREE_ID="0000000000000000000000000000000000000000"
+          
+          # https://stackoverflow.com/questions/40883798/how-to-get-git-diff-of-the-first-commit
+          if [[ $BEFORE = $ZERO_TREE_ID ]]; then
+            BEFORE=$EMPTY_TREE_ID
+          fi
+          
+          if [[ $AFTER = $ZERO_TREE_ID ]]; then
+            AFTER=$EMPTY_TREE_ID
+          fi
+          
+          git diff --name-status --pretty="format:" "$BEFORE" "$AFTER" > ../.changed
+          python ../slate-instance-push-updates.py "../.changed" "${{ secrets.SLATE_API_TOKEN }}" "${{ inputs.slate_api_endpoint }}"
+
+      - name: Commit SLATE Instance ID
+        if: ${{ steps.deploy.outputs.push == 'true' }}
+        working-directory: ./checkout
+        run: |-
+          git add .
+          git commit -m "append new SLATE instance ID" --allow-empty
+          git push
+
+      - name: Email Changes
+        if: ${{ steps.deploy.outputs.push == 'true' && inputs.email_changes }}
+        working-directory: ./checkout
+        env:
+          GITHUB_API_COMMIT_ENDPOINT: "${{ github.api_url }}/repos/${{ github.repository }}/commits"
+          MAILGUN_SUBJECT: "${{ inputs.mailgun_subject }}"
+          MAILGUN_API_KEY: "${{ secrets.mailgun_api_key }}"
+          MAILGUN_DOMAIN: "${{ inputs.mailgun_domain }}"
+          MAILGUN_FROM: "${{ inputs.mailgun_from }}"
+          MAILGUN_SEND_TO: "${{ inputs.mailgun_send_to }}"
+        run: |-
+          python ../generate-mail-body.py ${{ github.event.after }}
+          python ../mailgun.py
