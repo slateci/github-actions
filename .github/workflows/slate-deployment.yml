@@ -44,7 +44,7 @@ on:
         required: true
 
 env:
-  SLATE_GITHUB_ACTIONS_BRANCH: master
+  SLATE_GITHUB_ACTIONS_BRANCH: feature/9-commit-race-condition-slate-deploymentyml
   SLATE_GITHUB_ACTIONS_RAWCONTENT_URL: https://raw.githubusercontent.com/slateci/github-actions
 
 jobs:
@@ -136,18 +136,18 @@ jobs:
           git diff --name-status --pretty="format:" "$BEFORE" "$AFTER" > ../.changed
           python ../slate-instance-push-updates.py "../.changed" "${{ secrets.SLATE_API_TOKEN }}" "${{ inputs.slate_api_endpoint }}"
 
-      - name: Commit SLATE Instance ID
-        if: ${{ steps.deploy.outputs.push == 'true' }}
+      - name: Commit new SLATE Instance ID
+        if: ${{ steps.deploy.outputs.add == 'true' }}
         working-directory: ./checkout
         run: |-
           git fetch
           git pull
           git add .
-          git commit -m "append new SLATE instance ID" --allow-empty
-          git push
+          git commit -m "append new SLATE instance ID"
+          git push       
 
       - name: Email Changes
-        if: ${{ steps.deploy.outputs.push == 'true' && inputs.email_changes }}
+        if: ${{ steps.deploy.outputs.add == 'true' || steps.deploy.outputs.modify == 'true' }}
         working-directory: ./checkout
         env:
           GITHUB_API_COMMIT_ENDPOINT: "${{ github.api_url }}/repos/${{ github.repository }}/commits"
