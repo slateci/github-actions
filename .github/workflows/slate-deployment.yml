@@ -3,11 +3,6 @@ name: SLATE Deployment
 on:
   workflow_call:
     inputs:
-      email_changes:
-        description: Whether or not to email changes to the maintainers.
-        required: false
-        default: false
-        type: boolean
       mailgun_domain:
         description: The domain associated with the Mailgun service.
         required: false
@@ -20,7 +15,7 @@ on:
         type: string
       mailgun_send_to:
         description: The comma-delimited "send to" list to use when sending emails.
-        required: false
+        required: true
         type: string
       mailgun_subject:
         description: The subject line to use when sending emails.
@@ -41,7 +36,7 @@ on:
     secrets:
       mailgun_api_key:
         description: The API key used to send email via the Mailgun service.
-        required: false
+        required: true
       slate_api_token:
         description: The SLATE API token used to communicate with the SLATE API endpoint.
         required: true
