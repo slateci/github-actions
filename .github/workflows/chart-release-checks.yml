@@ -78,8 +78,8 @@ jobs:
         uses: BSFishy/pip-action@v1
         with:
           packages: |
-            pyyaml
-            semver
+            pyyaml==6.0
+            semver==2.13.0
 
       - name: Compare Expected Release Versions (Prod)
         if: ${{ inputs.helm_release_namespace == 'production' }}
