@@ -22,7 +22,7 @@ slateAPIEndpoint = sys.argv[3]
 if 'DEBUG' in os.environ and os.environ['DEBUG'] == 'TRUE':
     logging.basicConfig(level=logging.DEBUG)
 else:
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
 
 
 def get_instance_id(cluster: str, app: str, retries: int = None) -> Optional[str]:
@@ -96,11 +96,6 @@ def add_instance() -> bool:
         appVersion = instanceConfig["appVersion"]
 
     valuesString = open(containerName + "/" + "values.yaml", "r").read()
-    # Using port 443 goes to the nginx proxy in front of the api server
-    # using this in gh actions often results in a timeout,
-    # we only need to use the proxy to talk to the api server from
-    # facilities like TACC
-    # uri = "https://api.slateci.io:443/v1alpha3/apps/" + appName
     uri = f"{slateAPIEndpoint}/v1alpha3/apps/" + appName
     logging.debug(f"Contacting {uri}")
     response = requests.post(
