@@ -137,7 +137,7 @@ def add_instance() -> bool:
             instance_file.close()
             logging.info("Wrote instance.yaml")
             # Git add commit push
-            sys.stdout.write("::set-output name=push::true\n")
+            sys.stdout.write("::set-output name=add::true\n")
         except IOError:
             logging.exception(f"Failed to update instance file with ID: {containerName}/instance.yaml")
     else:
@@ -221,7 +221,7 @@ for Entry in ChangedFiles:
         logging.debug(f"Got {response} from the server: {response.text}")
         if response.status_code == 200:
             logging.info(f"Successfully updated instance {instanceID}")
-            sys.stdout.write("::set-output name=push::true\n")
+            sys.stdout.write("::set-output name=modify::true\n")
         else:
             logging.error("Encountered error while adding instance")
             logging.error(f"Got a {response.status_code} from the server")
