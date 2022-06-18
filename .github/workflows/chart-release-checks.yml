@@ -35,6 +35,10 @@ on:
         description: The Google Cloud Workload Identity Provider (WIP).
         required: true
 
+env:
+  SLATE_GITHUB_ACTIONS_BRANCH: master
+  SLATE_GITHUB_ACTIONS_RAWCONTENT_URL: https://raw.githubusercontent.com/slateci/github-actions
+
 jobs:
   semver:
     name: Semver Checks
@@ -93,5 +97,5 @@ jobs:
           HELM_RELEASE_NAMESPACE: ${{ inputs.helm_release_namespace }}
           HELM_RELEASE_PREFIX: ${{ inputs.helm_release_prefix }}
         run: |-
-          curl -fsSL https://raw.githubusercontent.com/slateci/github-actions/master/scripts/semver-health.py -o semver-health.py
+          curl -fsSL ${{ env.SLATE_GITHUB_ACTIONS_RAWCONTENT_URL }}/${{ env.SLATE_GITHUB_ACTIONS_BRANCH }}/scripts/semver-health.py -o semver-health.py
           python semver-health.py
