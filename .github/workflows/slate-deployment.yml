@@ -45,6 +45,11 @@ on:
       slate_api_token:
         description: The SLATE API token used to communicate with the SLATE API endpoint.
         required: true
+
+env:
+  SLATE_GITHUB_ACTIONS_BRANCH: master
+  SLATE_GITHUB_ACTIONS_RAW_URL: https://raw.githubusercontent.com/slateci/github-actions
+
 jobs:
   lint:
     name: Lint
@@ -97,14 +102,21 @@ jobs:
             jinja2==3.1.2
             requests==2.27.1
 
-      - name: Download workflow scripts
+      - name: Download workflow dependencies
         run: |-
           mkdir -p ./templates
-          curl -fsSL https://raw.githubusercontent.com/slateci/github-actions/feature/6_add-slate-instance-gitops/scripts/generate-mail-body.py -o generate-mail-body.py
-          curl -fsSL https://raw.githubusercontent.com/slateci/github-actions/feature/6_add-slate-instance-gitops/scripts/mailgun.py -o mailgun.py
-          curl -fsSL https://raw.githubusercontent.com/slateci/github-actions/feature/6_add-slate-instance-gitops/scripts/slate-instance-push-updates.py -o slate-instance-push-updates.py
-          curl -fsSL https://raw.githubusercontent.com/slateci/github-actions/feature/6_add-slate-instance-gitops/templates/email_template_html.j2 -o ./templates/email_template_html.j2
-          curl -fsSL https://raw.githubusercontent.com/slateci/github-actions/feature/6_add-slate-instance-gitops/templates/email_template_text.j2 -o ./templates/email_template_text.j2
+          
+          # Python files
+          for FILENAME in generate-mail-body.py mailgun.py slate-instance-push-updates.py
+          do
+            curl -fsSL ${{ env.SLATE_GITHUB_ACTIONS_RAW_URL }}/${{ env.SLATE_GITHUB_ACTIONS_BRANCH }}/scripts/$FILENAME -o $FILENAME
+          done
+          
+          # Jinja2 templates
+          for FILENAME in email_template_html.j2 email_template_text.j2
+          do
+            curl -fsSL ${{ env.SLATE_GITHUB_ACTIONS_RAW_URL }}/${{ env.SLATE_GITHUB_ACTIONS_BRANCH }}/templates/$FILENAME -o ./templates/$FILENAME
+          done
 
       - id: deploy
         name: Deploy to SLATE
