@@ -70,4 +70,4 @@ if __name__ == '__main__':
             f" of the deployed appVersion \"{deployed_appversion}\". Update the source and" +
             " try again."
         )
-    logging.info("Source appVersion is correctly head of deployed appVersion.")
+    logging.info("Source appVersion is correctly ahead of deployed appVersion.")
