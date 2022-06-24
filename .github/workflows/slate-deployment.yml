@@ -65,7 +65,11 @@ jobs:
           config_data: |
             extends: default
             rules:
+              empty-lines:
+                level: warning
               line-length:
+                level: warning
+              new-line-at-end-of-file:
                 level: warning
           file_or_dir: ./*/values.yaml ./*/instance.yaml
 
