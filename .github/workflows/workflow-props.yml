@@ -76,7 +76,7 @@ jobs:
               except yaml.YAMLError as ex:
                 raise ex
               now = datetime.now()
-              date_time = now.strftime(${{ env.DEV_SEMVER_DATE }})
+              date_time = now.strftime("${{ env.DEV_SEMVER_DATE }}")
               set_env("RELEASE_VERSION", f"{data_loaded['appVersion']}-pre.1+build.{date_time}")
 
       - name: "Find Release Version: staging/production"
