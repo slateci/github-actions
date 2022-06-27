@@ -18,7 +18,7 @@ on:
         type: string
 
 env:
-  DEV_SEMVER_DATE: "%Y%d%m_%H%M%S"
+  DEV_SEMVER_DATE: "%Y%d%m.%H%M%S"
 
 jobs:
   workflow-props:
