@@ -2,7 +2,7 @@
 
 [![License: Unlicense](https://img.shields.io/badge/license-Unlicense-blue.svg)](http://unlicense.org/)
 
-This repository contains GitHub Actions, Workflows, etc. used by the different SLATECI repositories.
+This repository contains GitHub Actions, Workflows, etc. used by the different SLATECI repositories and described in the [internal documentation](https://github.com/slateci/slate-documentation/blob/master/docs/source/deployment/github-actions.rst).
 
 ## Resources
 

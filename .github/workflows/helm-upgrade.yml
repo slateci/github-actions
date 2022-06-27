@@ -71,6 +71,7 @@ jobs:
         run: |-
           helm secrets upgrade ${{ inputs.helm_release_prefix }}-${{ env.HELM_RELEASE_NAMESPACE_SHORTHAND }} . \
           --set dockerImageTag=${{ env.RELEASE_VERSION }} \
+          --set portalVersionOverride=${{ env.RELEASE_VERSION }} \
           -f ./vars/${{ env.HELM_RELEASE_NAMESPACE_SHORTHAND }}/secrets.yml \
           -f ./vars/${{ env.HELM_RELEASE_NAMESPACE_SHORTHAND }}/values.yml \
           -f ./vars/secrets.yml \
