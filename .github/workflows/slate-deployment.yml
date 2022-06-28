@@ -71,6 +71,8 @@ jobs:
                 level: warning
               new-line-at-end-of-file:
                 level: warning
+              trailing-spaces:
+                level: warning
           file_or_dir: ./*/values.yaml ./*/instance.yaml
 
   deploy:
