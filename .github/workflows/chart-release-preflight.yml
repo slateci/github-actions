@@ -1,4 +1,4 @@
-name: Chart Release Checks
+name: Chart Release Pre-flight
 
 on:
   workflow_call:
@@ -20,6 +20,10 @@ on:
         description: The expected production release semantic version, e.g. '1.0.0'.
         required: false
         type: string
+      repository:
+        description: The GitHub repository to clone, e.g. 'slateci/helm-slate-api'.
+        required: true
+        type: string
 
     secrets:
       gc_compute_zone:
@@ -40,7 +44,7 @@ env:
   SLATE_GITHUB_ACTIONS_RAWCONTENT_URL: https://raw.githubusercontent.com/slateci/github-actions
 
 jobs:
-  semver:
+  checks:
     name: Semver Checks
     runs-on: ubuntu-20.04
 
@@ -92,10 +96,37 @@ jobs:
             if semver.compare("${{ inputs.prod-release-semver }}", os.environ.get('RELEASE_VERSION')) != 0:
               raise Exception("The source appVersion in Chart.yaml does not match chosen release version.")
 
-      - name: Compare Deployed & Source Release Versions
+      - id: semver-health
+        name: Compare Deployed & Source Release Versions
         env:
           HELM_RELEASE_NAMESPACE: ${{ inputs.helm_release_namespace }}
           HELM_RELEASE_PREFIX: ${{ inputs.helm_release_prefix }}
         run: |-
           curl -fsSL ${{ env.SLATE_GITHUB_ACTIONS_RAWCONTENT_URL }}/${{ env.SLATE_GITHUB_ACTIONS_BRANCH }}/scripts/semver-health.py -o semver-health.py
           python semver-health.py
+
+  bump:
+    name: Semver Bump
+    runs-on: ubuntu-20.04
+    if: ${{ steps.semver-health.outputs.ahead = 'false' }}
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          path: .
+          ref: ${{ env.GIT_REF }}
+          repository: ${{ inputs.repository }}
+
+      - name: asdfasdfasdf
+        env:
+          HELM_RELEASE_NAMESPACE: ${{ inputs.helm_release_namespace }}
+          HELM_RELEASE_PREFIX: ${{ inputs.helm_release_prefix }}
+          PRERELEASE_DATETIME_SUFFIX: "%Y%m%d.%H%M%S"
+        run: |-
+          echo "hello world"

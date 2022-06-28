@@ -17,9 +17,6 @@ on:
         default: 3.9
         type: string
 
-env:
-  DEV_SEMVER_DATE: "%Y%m%d.%H%M%S"
-
 jobs:
   workflow-props:
     name: Calculate Workflow Properties
@@ -62,24 +59,7 @@ jobs:
           packages: |
             pyyaml==6.0
 
-      - name: "Find Release Version: development"
-        if: ${{ inputs.helm_release_namespace == 'development' }}
-        uses: jannekem/run-python-script-action@v1
-        with:
-          script: |
-            from datetime import datetime
-            import yaml
-            
-            with open("Chart.yaml") as stream:
-              try:
-                data_loaded = yaml.safe_load(stream)
-              except yaml.YAMLError as ex:
-                raise ex
-              now = datetime.now()
-              date_time = now.strftime("${{ env.DEV_SEMVER_DATE }}")
-              set_env("RELEASE_VERSION", f"{data_loaded['appVersion']}-pre.{date_time}")
-
-      - name: "Find Release Version: staging/production"
+      - name: Find Release Version
         if: ${{ inputs.helm_release_namespace != 'development' }}
         uses: jannekem/run-python-script-action@v1
         with:

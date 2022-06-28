@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 """
-This is a script to return a GitHub output variable if a deployed semantic version is newer than
-its counterpart in the repository's ``Chart.yaml``, specifically the ``appVersion`` metadata.
+This is a script to bump the semantic version in the repository's ``Chart.yaml``,
+specifically the ``appVersion`` metadata.
 
 This script uses the following system environmental variables as inputs:
 
@@ -11,6 +11,7 @@ This script uses the following system environmental variables as inputs:
 * ``HELM_RELEASE_NAMESPACE``: specified as input to the GitHub workflow.
 * ``HELM_RELEASE_NAMESPACE_SHORTHAND``: derived from ``HELM_RELEASE_NAMESPACE`` by the GitHub workflow.
 * ``HELM_RELEASE_PREFIX``: specified as input to the GitHub workflow.
+* ``PRERELEASE_DATETIME_SUFFIX``: datetime object to apply as pre-release suffix
 
 Additionally, the tools installed and configured by the GitHub composite action
 ``gcloud-helm-setup/action.yml`` are required.
@@ -22,6 +23,8 @@ import subprocess
 import semver
 import sys
 import yaml
+
+from datetime import datetime
 from yaml.loader import SafeLoader
 
 # Set up logging:
@@ -32,10 +35,10 @@ else:
 
 # Main:
 if __name__ == '__main__':
-    discovered_appversion = os.environ.get('RELEASE_VERSION')
     helm_release_namespace = os.environ.get('HELM_RELEASE_NAMESPACE')
     helm_release_namespace_shorthand = os.environ.get('HELM_RELEASE_NAMESPACE_SHORTHAND')
     helm_release_prefix = os.environ.get('HELM_RELEASE_PREFIX')
+    prerelease_datetime_suffix = os.environ.get('PRERELEASE_DATETIME_SUFFIX')
 
     command = [
         'helm', 'list',
@@ -61,21 +64,16 @@ if __name__ == '__main__':
     except subprocess.CalledProcessError as ex:
         raise ex
 
-    logging.info("Discovering appVersion from source...")
-    logging.info(f"Found appVersion from source: {discovered_appversion}")
+    old_versioninfo = semver.VersionInfo.parse(deployed_appversion)
+    new_versioninfo = old_versioninfo.bump_patch().finalize_version()
 
-    logging.info("Verifying newer appVersion...")
-    # deployed_appversion_parsed = semver.VersionInfo.parse(deployed_appversion)
-    # discovered_appversion_parsed = semver.VersionInfo.parse(discovered_appversion)
-    comparison = semver.compare(deployed_appversion, discovered_appversion)
-    logging.debug(f"Raw semver comparison result: {comparison}")
-    if semver.compare(discovered_appversion, deployed_appversion) < 1:
-        logging.info(
-            f"The source appVersion \"{discovered_appversion}\" in Chart.yaml is not ahead" +
-            f" of the deployed appVersion \"{deployed_appversion}\". Update the source and" +
-            " try again."
-        )
-        sys.stdout.write("::set-output name=ahead::false\n")
+    if helm_release_namespace == 'development':
+        now = datetime.now()
+        date_time = now.strftime(prerelease_datetime_suffix)
+        app_version = f"{str(new_versioninfo)}-pre.{date_time}"
+        logging.info(f"New appVersion to apply: {app_version}")
+        sys.stdout.write(f"::set-output name=version::{app_version}\n")
     else:
-        logging.info("Source appVersion is correctly ahead of deployed appVersion.")
-        sys.stdout.write("::set-output name=ahead::true\n")
+        app_version = f"{str(new_versioninfo)}"
+        logging.info(f"New appVersion to apply: {app_version}")
+        sys.stdout.write(f"::set-output name=version::{str(new_versioninfo)}\n")
