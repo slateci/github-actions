@@ -1,4 +1,6 @@
 name: Chart Repo Release
+concurrency:
+  group: crr-${{ github.repository }}-${{ github.ref_name }}
 
 on:
   workflow_call:
