@@ -10,18 +10,10 @@ on:
         required: false
         default: 3.8.1
         type: string
-      python_version:
-        description: The version of Python to use, e.g. 3.9.
-        required: false
-        default: 3.9
-        type: string
 
     secrets:
       gh_token:
         description: The GitHub token of this repository.
-        required: true
-      slate_api_token:
-        description: The SLATE API token used to communicate with the SLATE API endpoints.
         required: true
 
 jobs:
@@ -50,46 +42,3 @@ jobs:
         uses: helm/chart-releaser-action@v1.4.0
         env:
           CR_TOKEN: "${{ secrets.gh_token }}"
-
-  notify:
-    name: Notify API Servers
-    runs-on: ubuntu-20.04
-    strategy:
-      matrix:
-        api_endpoint:
-          - https://api.dev.slateci.io
-          - https://api.staging.slateci.io
-#          - https://api.slateci.io
-
-    steps:
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ inputs.python_version }}
-
-      - name: Install Python packages
-        uses: BSFishy/pip-action@v1
-        with:
-          packages: |
-            requests==2.27.1
-
-      - name: Update Apps
-        uses: jannekem/run-python-script-action@v1
-        with:
-          script: |
-            import requests
-            
-            slateAPIEndPoint = "${{ matrix.api_endpoint }}"
-            slateAPIToken = "${{ secrets.slate_api_token }}"
-            
-            uri = f"{slateAPIEndPoint}/v1alpha3/update_apps"
-            response = requests.post(
-                uri,
-                params={"token": slateAPIToken},
-                json={"apiVersion": "v1alpha3"}
-            )
-            
-            if response.status_code != 200:
-                warning(f"Unable to notify API server: {slateAPIEndPoint}")
-            else:
-                print(f"Successfully notified API server: {slateAPIEndPoint}")
