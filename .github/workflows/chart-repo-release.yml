@@ -86,9 +86,7 @@ jobs:
             response = requests.post(
                 uri,
                 params={"token": slateAPIToken},
-                json={
-                    "apiVersion": "v1alpha3"
-                }
+                json={"apiVersion": "v1alpha3"}
             )
             
             if response.status_code != 200:
