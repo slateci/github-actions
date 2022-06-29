@@ -56,6 +56,6 @@ jobs:
             )
             
             if response.status_code != 200:
-                warning(f"Unable to notify API server: {slateAPIEndPoint}")
+                error(f"Unable to notify API server: {slateAPIEndPoint}")
             else:
                 print(f"Successfully notified API server: {slateAPIEndPoint}")
