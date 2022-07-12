@@ -110,8 +110,8 @@ jobs:
           HELM_RELEASE_NAMESPACE: ${{ inputs.helm_release_namespace }}
           HELM_RELEASE_PREFIX: ${{ inputs.helm_release_prefix }}
         run: |-
-          curl -fsSL ${{ env.SLATE_GITHUB_ACTIONS_RAWCONTENT_URL }}/${{ env.SLATE_GITHUB_ACTIONS_BRANCH }}/scripts/semver-health.py -o semver-health.py
-          python semver-health.py
+          curl -fsSL ${{ env.SLATE_GITHUB_ACTIONS_RAWCONTENT_URL }}/${{ env.SLATE_GITHUB_ACTIONS_BRANCH }}/scripts/semver-compare.py -o semver-compare.py
+          python semver-compare.py
 
       - id: bump
         name: Bump Release Version
@@ -121,7 +121,7 @@ jobs:
           HELM_RELEASE_PREFIX: ${{ inputs.helm_release_prefix }}
           PRERELEASE_DATETIME_SUFFIX: "%Y%m%d.%H%M%S"
         run: |-
-          curl -fsSL ${{ env.SLATE_GITHUB_ACTIONS_RAWCONTENT_URL }}/${{ env.SLATE_GITHUB_ACTIONS_BRANCH }}/scripts/semver-health.py -o semver-health.py
+          curl -fsSL ${{ env.SLATE_GITHUB_ACTIONS_RAWCONTENT_URL }}/${{ env.SLATE_GITHUB_ACTIONS_BRANCH }}/scripts/semver-compare.py -o semver-compare.py
           python semver-bump.py
           
       - name: Apply Release Version
