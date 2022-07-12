@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 """
-This is a script to bump the semantic version in the repository's ``Chart.yaml``,
-specifically the ``appVersion`` metadata.
+This is a script to return a GitHub output variable describing the bumped semantic version in the
+repository's ``Chart.yaml``, specifically the ``appVersion`` metadata.
 
 This script uses the following system environmental variables as inputs:
 
