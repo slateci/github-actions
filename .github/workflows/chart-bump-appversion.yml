@@ -1,10 +1,10 @@
-name: Chart Preflight
+name: Chart Bump appVersion
 
 on:
   workflow_call:
     inputs:
       helm_release_namespace:
-        description: Kubernetes namespace corresponding to a Helm release, e.g. 'development'.
+        description: Kubernetes namespace corresponding to a Helm release, e.g. 'development', 'staging'.
         required: true
         type: string
       helm_release_prefix:
@@ -36,8 +36,8 @@ env:
   SLATE_GITHUB_ACTIONS_RAWCONTENT_URL: https://raw.githubusercontent.com/slateci/github-actions
 
 jobs:
-  semver:
-    name: Semver Status
+  bump-appversion:
+    name: Bump appVersion
     runs-on: ubuntu-20.04
 
     permissions:
@@ -67,7 +67,7 @@ jobs:
       - name: Check out repo
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          fetch-depth: 1
           path: .
           ref: ${{ env.GIT_REF }}
 
@@ -114,17 +114,18 @@ jobs:
           python semver-health.py
 
       - id: bump
-        name: Semver Bump
+        name: Bump Release Version
         if: ${{ inputs.helm_release_namespace != 'production' && comparison.outputs.ahead == 'false' }}
         env:
           HELM_RELEASE_NAMESPACE: ${{ inputs.helm_release_namespace }}
           HELM_RELEASE_PREFIX: ${{ inputs.helm_release_prefix }}
+          PRERELEASE_DATETIME_SUFFIX: "%Y%m%d.%H%M%S"
         run: |-
           curl -fsSL ${{ env.SLATE_GITHUB_ACTIONS_RAWCONTENT_URL }}/${{ env.SLATE_GITHUB_ACTIONS_BRANCH }}/scripts/semver-health.py -o semver-health.py
           python semver-bump.py
           
-      - name: Semver Bump Apply
-        if: ${{ inputs.helm_release_namespace != 'production' && versions-comparison.outputs.ahead == 'false' }}
+      - name: Apply Release Version
+        if: ${{ versions-comparison.outputs.ahead == 'false' }}
         run: |-
           sed -i 's/^appVersion:.*$/appVersion: "${{ bump.outputs.version }}"/g' Chart.yaml
           git add Chart.yaml

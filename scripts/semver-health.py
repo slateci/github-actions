@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
 """
-This is a script to return a GitHub output variable if a deployed semantic version is newer than
-its counterpart in the repository's ``Chart.yaml``, specifically the ``appVersion`` metadata.
+This is a script to return a GitHub output variable describing whether a deployed semantic version
+is newer than its counterpart in the repository's ``Chart.yaml``, specifically the ``appVersion``
+metadata.
 
 This script uses the following system environmental variables as inputs:
 
@@ -65,17 +66,18 @@ if __name__ == '__main__':
     logging.info(f"Found appVersion from source: {discovered_appversion}")
 
     logging.info("Verifying newer appVersion...")
-    # deployed_appversion_parsed = semver.VersionInfo.parse(deployed_appversion)
-    # discovered_appversion_parsed = semver.VersionInfo.parse(discovered_appversion)
     comparison = semver.compare(deployed_appversion, discovered_appversion)
     logging.debug(f"Raw semver comparison result: {comparison}")
+
     if semver.compare(discovered_appversion, deployed_appversion) < 1:
         logging.info(
             f"The source appVersion \"{discovered_appversion}\" in Chart.yaml is not ahead" +
-            f" of the deployed appVersion \"{deployed_appversion}\". Update the source and" +
-            " try again."
+            f" of the deployed appVersion \"{deployed_appversion}\"."
         )
         sys.stdout.write("::set-output name=ahead::false\n")
     else:
-        logging.info("Source appVersion is correctly ahead of deployed appVersion.")
+        logging.info(
+            f"The source appVersion \"{discovered_appversion}\" in Chart.yaml is ahead" +
+            f" of the deployed appVersion \"{deployed_appversion}\"."
+        )
         sys.stdout.write("::set-output name=ahead::true\n")
