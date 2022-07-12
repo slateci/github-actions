@@ -11,14 +11,6 @@ on:
         description: The prefix used for the Helm release, e.g. 'slate-portal', 'slate-api'.
         required: true
         type: string
-      prod_git_ref:
-        description: The git ref to use when deployment to production, e.g. '/refs/tags/v1.0.4'.
-        required: false
-        type: string
-      prod_release_expected:
-        description: The expected production release semantic version, e.g. '1.0.0'.
-        required: false
-        type: string
       python_version:
         description: The version of Python to use, e.g. 3.9.
         required: false
@@ -67,9 +59,10 @@ jobs:
 
       - name: "Chosen environment: production"
         if: ${{ inputs.helm_release_namespace == 'production' }}
-        run: |-
-          echo "GIT_REF=${{ inputs.prod_git_ref }}" >> $GITHUB_ENV
-          echo "HELM_RELEASE_NAMESPACE_SHORTHAND=prod" >> $GITHUB_ENV
+        uses: jannekem/run-python-script-action@v1
+        with:
+          script: |
+            error("This workflow is not appropriate for the production environment.")
 
       - name: Check out repo
         uses: actions/checkout@v3
