@@ -73,6 +73,11 @@ jobs:
           path: .
           ref: ${{ env.GIT_REF }}
 
+      - name: Configure Git
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+
       - name: Set Up Tools
         uses: slateci/github-actions/.github/actions/gcloud-helm-setup@master
         with:
@@ -125,7 +130,7 @@ jobs:
         run: |-
           curl -fsSL ${{ env.SLATE_GITHUB_ACTIONS_RAWCONTENT_URL }}/${{ env.SLATE_GITHUB_ACTIONS_BRANCH }}/scripts/semver-bump.py -o semver-bump.py
           python semver-bump.py
-          
+
       - name: Apply Release Version
         if: ${{ steps.compare-versions.outputs.ahead == 'false' }}
         run: |-
