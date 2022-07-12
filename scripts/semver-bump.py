@@ -65,7 +65,7 @@ if __name__ == '__main__':
         raise ex
 
     old_versioninfo = semver.VersionInfo.parse(deployed_appversion)
-    new_versioninfo = old_versioninfo.bump_patch().finalize_version()
+    new_versioninfo = old_versioninfo.finalize_version().bump_patch()
 
     if helm_release_namespace == 'development':
         now = datetime.now()
