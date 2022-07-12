@@ -1,4 +1,6 @@
 name: Chart Bump appVersion
+concurrency:
+  group: cba-${{ github.repository }}-${{ github.ref_name }}
 
 on:
   workflow_call:
