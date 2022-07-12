@@ -40,6 +40,9 @@ if __name__ == '__main__':
     helm_release_prefix = os.environ.get('HELM_RELEASE_PREFIX')
     prerelease_datetime_suffix = os.environ.get('PRERELEASE_DATETIME_SUFFIX')
 
+    if helm_release_namespace == 'production':
+        raise Exception("This script is not appropriate for the production environment.")
+
     command = [
         'helm', 'list',
         '-n', helm_release_namespace,
