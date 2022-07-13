@@ -17,8 +17,8 @@ Additionally, the tools installed and configured by the GitHub composite action
 ``gcloud-helm-setup/action.yml`` are required.
 """
 
-import os
 import logging
+import os
 import subprocess
 import semver
 import sys

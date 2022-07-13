@@ -119,7 +119,9 @@ jobs:
                 data_loaded = yaml.safe_load(stream)
               except yaml.YAMLError as ex:
                 raise ex
-              set_env("RELEASE_VERSION", data_loaded["appVersion"])
+              app_version = data_loaded["appVersion"]
+            
+            set_env("RELEASE_VERSION", app_version)
 
       - name: Find Release Version (Staging)
         if: ${{ inputs.helm_release_namespace == 'staging' }}
@@ -134,8 +136,10 @@ jobs:
                 data_loaded = yaml.safe_load(stream)
               except yaml.YAMLError as ex:
                 raise ex
-              new_versioninfo = semver.VersionInfo.parse(data_loaded["appVersion"]).finalize_version()
-              set_env("RELEASE_VERSION", str(new_versioninfo))
+              app_version = data_loaded["appVersion"]
+            
+            new_versioninfo = semver.VersionInfo.parse(app_version).finalize_version()
+            set_env("RELEASE_VERSION", str(new_versioninfo))
 
       - id: compare-versions
         name: Compare Deployed & Source Release Versions
@@ -174,8 +178,8 @@ jobs:
           else
             NEW_VERSION=${{ steps.bump-version.outputs.version }}
           fi
-          sed -i 's/^appVersion:.*$/appVersion: "$NEW_VERSION"/g' Chart.yaml
           
+          sed -i 's/^appVersion:.*$/appVersion: "$NEW_VERSION"/g' Chart.yaml
           git add Chart.yaml
           git commit -m 'Increment appVersion: ${{ env.RELEASE_VERSION }}' --allow-empty
           git push
@@ -199,7 +203,7 @@ jobs:
           git push
 
       - id: force-bump-version-staging
-        name: Force-bump Release Version (Staging)
+        name: Force-bump Release Version on develop branch (Staging)
         if: ${{ inputs.helm_release_namespace == 'staging' }}
         uses: jannekem/run-python-script-action@v1
         with:
@@ -216,14 +220,16 @@ jobs:
                 data_loaded = yaml.safe_load(stream)
               except yaml.YAMLError as ex:
                 raise ex
-              discovered_versioninfo = semver.VersionInfo.parse(data_loaded["appVersion"])
-              new_versioninfo = discovered_versioninfo.finalize_version().bump_patch()
-              now = datetime.now()
-              date_time = now.strftime(prerelease_datetime_suffix)
-              app_version = f"{str(new_versioninfo)}-pre.{date_time}"
-              set_output(version, app_version)
+              app_version = data_loaded["appVersion"]
+            
+            discovered_versioninfo = semver.VersionInfo.parse(app_version)
+            new_versioninfo = discovered_versioninfo.finalize_version().bump_patch()
+            now = datetime.now()
+            date_time = now.strftime(prerelease_datetime_suffix)
+            new_app_version = f"{str(new_versioninfo)}-pre.{date_time}"
+            set_output(version, new_app_version)
 
-      - name: Apply Release Version (Staging)
+      - name: Force-apply Release Version on develop branch (Staging)
         if: ${{ inputs.helm_release_namespace == 'staging' }}
         working-directory: ./development
         run: |-

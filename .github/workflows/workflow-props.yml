@@ -70,7 +70,9 @@ jobs:
                 data_loaded = yaml.safe_load(stream)
               except yaml.YAMLError as ex:
                 raise ex
-              set_env("RELEASE_VERSION", data_loaded["appVersion"])
+              app_version = data_loaded["appVersion"]
+            
+            set_env("RELEASE_VERSION", app_version)
 
       - name: Store Workflow Properties
         run: |-
