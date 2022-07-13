@@ -67,6 +67,13 @@ jobs:
           script: |
             error("This workflow is not appropriate for the production environment.")
 
+      - name: Check out repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          path: ./${{ inputs.helm_release_namespace }}
+          ref: ${{ env.GIT_REF }}
+
       - name: Set Up Tools
         uses: slateci/github-actions/.github/actions/gcloud-helm-setup@master
         with:
@@ -94,13 +101,6 @@ jobs:
           do
             curl -fsSL ${{ env.SLATE_GITHUB_ACTIONS_RAWCONTENT_URL }}/${{ env.SLATE_GITHUB_ACTIONS_BRANCH }}/scripts/$FILENAME -o $FILENAME
           done
-
-      - name: Check out repo
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          path: ./${{ inputs.helm_release_namespace }}
-          ref: ${{ env.GIT_REF }}
 
       - name: Configure Git
         working-directory: ./${{ inputs.helm_release_namespace }}
