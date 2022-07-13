@@ -67,11 +67,6 @@ jobs:
           script: |
             error("This workflow is not appropriate for the production environment.")
 
-      - name: Configure Git
-        run: |
-          git config user.name "${{ github.actor }}" --global
-          git config user.email "${{ github.actor }}@users.noreply.github.com" --global
-
       - name: Set Up Tools
         uses: slateci/github-actions/.github/actions/gcloud-helm-setup@master
         with:
@@ -106,6 +101,12 @@ jobs:
           fetch-depth: 0
           path: ./${{ inputs.helm_release_namespace }}
           ref: ${{ env.GIT_REF }}
+
+      - name: Configure Git
+        working-directory: ./${{ inputs.helm_release_namespace }}
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
 
       - name: Find Release Version (Dev)
         if: ${{ inputs.helm_release_namespace == 'development' }}
@@ -194,6 +195,13 @@ jobs:
           fetch-depth: 0
           path: ./development
           ref: refs/heads/develop
+
+      - name: Configure Git for develop branch (Staging)
+        if: ${{ inputs.helm_release_namespace == 'staging' }}
+        working-directory: ./development
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
 
       - name: Cherry-pick (Staging)
         if: ${{ inputs.helm_release_namespace == 'staging' }}
