@@ -67,16 +67,19 @@ if __name__ == '__main__':
     except subprocess.CalledProcessError as ex:
         raise ex
 
-    old_versioninfo = semver.VersionInfo.parse(deployed_appversion)
-    new_versioninfo = old_versioninfo.finalize_version().bump_patch()
+    deployed_versioninfo = semver.VersionInfo.parse(deployed_appversion)
 
     if helm_release_namespace == 'development':
+        new_versioninfo = deployed_versioninfo.finalize_version()
         now = datetime.now()
         date_time = now.strftime(prerelease_datetime_suffix)
         app_version = f"{str(new_versioninfo)}-pre.{date_time}"
+
         logging.info(f"New appVersion to apply: {app_version}")
         sys.stdout.write(f"::set-output name=version::{app_version}\n")
     else:
+        new_versioninfo = deployed_versioninfo.finalize_version().bump_patch()
         app_version = f"{str(new_versioninfo)}"
+
         logging.info(f"New appVersion to apply: {app_version}")
         sys.stdout.write(f"::set-output name=version::{str(new_versioninfo)}\n")
