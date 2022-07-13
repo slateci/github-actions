@@ -72,6 +72,7 @@ jobs:
                 raise ex
               app_version = data_loaded["appVersion"]
             
+            print(f"Setting RELEASE_VERSION to: {app_version}")
             set_env("RELEASE_VERSION", app_version)
 
       - name: Store Workflow Properties

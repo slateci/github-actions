@@ -122,6 +122,7 @@ jobs:
                 raise ex
               app_version = data_loaded["appVersion"]
             
+            print(f"Setting RELEASE_VERSION to: {app_version}")
             set_env("RELEASE_VERSION", app_version)
 
       - name: Find Release Version (Staging)
@@ -140,6 +141,7 @@ jobs:
               app_version = data_loaded["appVersion"]
             
             new_versioninfo = semver.VersionInfo.parse(app_version).finalize_version()
+            print(f"Setting RELEASE_VERSION to: {str(new_versioninfo)}")
             set_env("RELEASE_VERSION", str(new_versioninfo))
 
       - id: compare-versions
@@ -235,6 +237,7 @@ jobs:
             now = datetime.now()
             date_time = now.strftime(prerelease_datetime_suffix)
             new_app_version = f"{str(new_versioninfo)}-pre.{date_time}"
+            print(f"New appVersion is: {new_app_version}")
             set_output(version, new_app_version)
 
       - name: Force-apply Release Version on develop branch (Staging)
