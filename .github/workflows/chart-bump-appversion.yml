@@ -126,7 +126,7 @@ jobs:
         env:
           HELM_RELEASE_NAMESPACE: ${{ inputs.helm_release_namespace }}
           HELM_RELEASE_PREFIX: ${{ inputs.helm_release_prefix }}
-          PRERELEASE_DATETIME_SUFFIX: "%Y%m%d.%H%M%S"
+          PRERELEASE_DATETIME_SUFFIX: "%Y%m%d-%H%M%S"
         run: |-
           curl -fsSL ${{ env.SLATE_GITHUB_ACTIONS_RAWCONTENT_URL }}/${{ env.SLATE_GITHUB_ACTIONS_BRANCH }}/scripts/semver-bump.py -o semver-bump.py
           python semver-bump.py
