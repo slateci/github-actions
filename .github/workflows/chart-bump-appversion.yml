@@ -175,14 +175,14 @@ jobs:
         if: ${{ inputs.helm_release_namespace == 'staging' }}
         working-directory: ./${{ inputs.helm_release_namespace }}
         run: |-
-          if [[ ${{ steps.compare-versions.outputs.ahead }} -eq 'true'
+          if [[ '${{ steps.compare-versions.outputs.ahead }}' -eq 'true' ]]
           then
-            NEW_VERSION=${{ env.RELEASE_VERSION }}
+            NEW_VERSION="${{ env.RELEASE_VERSION }}"
           else
-            NEW_VERSION=${{ steps.bump-version.outputs.version }}
+            NEW_VERSION="${{ steps.bump-version.outputs.version }}"
           fi
           
-          sed -i 's/^appVersion:.*$/appVersion: "$NEW_VERSION"/g' Chart.yaml
+          sed -i "s/^appVersion:.*$/appVersion: \"$NEW_VERSION\"/g" Chart.yaml
           git add Chart.yaml
           git commit -m 'Increment appVersion: ${{ env.RELEASE_VERSION }}' --allow-empty
           git push
@@ -209,7 +209,7 @@ jobs:
         if: ${{ inputs.helm_release_namespace == 'staging' }}
         working-directory: ./development
         run: |-
-          git cherry-pick ${{ steps.release-version-staging.outputs.hash }}          
+          git cherry-pick ${{ steps.release-version-staging.outputs.hash }} --allow-empty
           git push
 
       - id: force-bump-version-staging
@@ -238,7 +238,7 @@ jobs:
             date_time = now.strftime(prerelease_datetime_suffix)
             new_app_version = f"{str(new_versioninfo)}-pre.{date_time}"
             print(f"New appVersion is: {new_app_version}")
-            set_output(version, new_app_version)
+            set_output("version", new_app_version)
 
       - name: Force-apply Release Version on develop branch (Staging)
         if: ${{ inputs.helm_release_namespace == 'staging' }}
