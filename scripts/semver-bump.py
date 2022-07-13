@@ -71,6 +71,9 @@ if __name__ == '__main__':
 
     if helm_release_namespace == 'development':
         new_versioninfo = deployed_versioninfo.finalize_version()
+        if semver.compare(str(new_versioninfo), str(deployed_appversion)) == 0:
+            new_versioninfo = deployed_versioninfo.finalize_version().bump_patch()
+
         now = datetime.now()
         date_time = now.strftime(prerelease_datetime_suffix)
         app_version = f"{str(new_versioninfo)}-pre.{date_time}"
