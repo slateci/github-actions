@@ -1,6 +1,6 @@
 name: Chart Bump appVersion
 concurrency:
-  group: cba-${{ github.repository }}-${{ github.ref_name }}
+  group: cba-${{ github.repository }}
 
 on:
   workflow_call:
@@ -34,6 +34,7 @@ on:
         required: true
 
 env:
+  PRERELEASE_DATETIME_SUFFIX: "%Y%m%d-%H%M%S"
   SLATE_GITHUB_ACTIONS_BRANCH: feature/20_investigate-release-version-automation
   SLATE_GITHUB_ACTIONS_RAWCONTENT_URL: https://raw.githubusercontent.com/slateci/github-actions
 
@@ -66,13 +67,6 @@ jobs:
           script: |
             error("This workflow is not appropriate for the production environment.")
 
-      - name: Check out repo
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 1
-          path: .
-          ref: ${{ env.GIT_REF }}
-
       - name: Configure Git
         run: |
           git config user.name "${{ github.actor }}"
@@ -98,18 +92,50 @@ jobs:
             pyyaml==6.0
             semver==2.13.0
 
-      - name: Find Release Version
+      - name: Download workflow dependencies
+        run: |-
+          # Python files
+          for FILENAME in semver-bump.py semver-compare.py
+          do
+            curl -fsSL ${{ env.SLATE_GITHUB_ACTIONS_RAWCONTENT_URL }}/${{ env.SLATE_GITHUB_ACTIONS_BRANCH }}/scripts/$FILENAME -o $FILENAME
+          done
+
+      - name: Check out repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          path: ./${{ inputs.helm_release_namespace }}
+          ref: ${{ env.GIT_REF }}
+
+      - name: Find Release Version (Dev)
+        if: ${{ inputs.helm_release_namespace == 'development' }}
         uses: jannekem/run-python-script-action@v1
         with:
           script: |
             import yaml
             
-            with open("Chart.yaml") as stream:
+            with open("./${{ inputs.helm_release_namespace }}/Chart.yaml") as stream:
               try:
                 data_loaded = yaml.safe_load(stream)
               except yaml.YAMLError as ex:
                 raise ex
               set_env("RELEASE_VERSION", data_loaded["appVersion"])
+
+      - name: Find Release Version (Staging)
+        if: ${{ inputs.helm_release_namespace == 'staging' }}
+        uses: jannekem/run-python-script-action@v1
+        with:
+          script: |
+            import semver
+            import yaml
+            
+            with open("./${{ inputs.helm_release_namespace }}/Chart.yaml") as stream:
+              try:
+                data_loaded = yaml.safe_load(stream)
+              except yaml.YAMLError as ex:
+                raise ex
+              new_versioninfo = semver.VersionInfo.parse(data_loaded["appVersion"]).finalize_version()
+              set_env("RELEASE_VERSION", str(new_versioninfo))
 
       - id: compare-versions
         name: Compare Deployed & Source Release Versions
@@ -117,7 +143,6 @@ jobs:
           HELM_RELEASE_NAMESPACE: ${{ inputs.helm_release_namespace }}
           HELM_RELEASE_PREFIX: ${{ inputs.helm_release_prefix }}
         run: |-
-          curl -fsSL ${{ env.SLATE_GITHUB_ACTIONS_RAWCONTENT_URL }}/${{ env.SLATE_GITHUB_ACTIONS_BRANCH }}/scripts/semver-compare.py -o semver-compare.py
           python semver-compare.py
 
       - id: bump-version
@@ -126,15 +151,83 @@ jobs:
         env:
           HELM_RELEASE_NAMESPACE: ${{ inputs.helm_release_namespace }}
           HELM_RELEASE_PREFIX: ${{ inputs.helm_release_prefix }}
-          PRERELEASE_DATETIME_SUFFIX: "%Y%m%d-%H%M%S"
         run: |-
-          curl -fsSL ${{ env.SLATE_GITHUB_ACTIONS_RAWCONTENT_URL }}/${{ env.SLATE_GITHUB_ACTIONS_BRANCH }}/scripts/semver-bump.py -o semver-bump.py
           python semver-bump.py
 
-      - name: Apply Release Version
-        if: ${{ steps.compare-versions.outputs.ahead == 'false' }}
+      - name: Apply Release Version (Dev - behind)
+        if: ${{ inputs.helm_release_namespace == 'development' && steps.compare-versions.outputs.ahead == 'false' }}
+        working-directory: ./${{ inputs.helm_release_namespace }}
         run: |-
           sed -i 's/^appVersion:.*$/appVersion: "${{ steps.bump-version.outputs.version }}"/g' Chart.yaml
           git add Chart.yaml
           git commit -m 'Increment appVersion: ${{ steps.bump-version.outputs.version }}'
+          git push
+
+      - id: release-version-staging
+        name: Apply Release Version (Staging)
+        if: ${{ inputs.helm_release_namespace == 'staging' }}
+        working-directory: ./${{ inputs.helm_release_namespace }}
+        run: |-
+          if [[ ${{ steps.compare-versions.outputs.ahead }} -eq 'true'
+          then
+            NEW_VERSION=${{ env.RELEASE_VERSION }}
+          else
+            NEW_VERSION=${{ steps.bump-version.outputs.version }}
+          fi
+          sed -i 's/^appVersion:.*$/appVersion: "$NEW_VERSION"/g' Chart.yaml
+          
+          git add Chart.yaml
+          git commit -m 'Increment appVersion: ${{ env.RELEASE_VERSION }}' --allow-empty
+          git push
+          
+          COMMIT_HASH=$(git log -1 --format="%H" ${{ env.GIT_REF }})
+          echo "::set-output name=hash::$COMMIT_HASH"
+
+      - name: Check out repo develop branch (Staging)
+        if: ${{ inputs.helm_release_namespace == 'staging' }}
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          path: ./development
+          ref: refs/heads/develop
+
+      - name: Cherry-pick (Staging)
+        if: ${{ inputs.helm_release_namespace == 'staging' }}
+        working-directory: ./development
+        run: |-
+          git cherry-pick ${{ steps.release-version-staging.outputs.hash }}          
+          git push
+
+      - id: force-bump-version-staging
+        name: Force-bump Release Version (Staging)
+        if: ${{ inputs.helm_release_namespace == 'staging' }}
+        uses: jannekem/run-python-script-action@v1
+        with:
+          script: |
+            import semver
+            import yaml
+            
+            from datetime import datetime
+            
+            prerelease_datetime_suffix = os.environ.get('PRERELEASE_DATETIME_SUFFIX')
+            
+            with open("./development/Chart.yaml") as stream:
+              try:
+                data_loaded = yaml.safe_load(stream)
+              except yaml.YAMLError as ex:
+                raise ex
+              discovered_versioninfo = semver.VersionInfo.parse(data_loaded["appVersion"])
+              new_versioninfo = discovered_versioninfo.finalize_version().bump_patch()
+              now = datetime.now()
+              date_time = now.strftime(prerelease_datetime_suffix)
+              app_version = f"{str(new_versioninfo)}-pre.{date_time}"
+              set_output(version, app_version)
+
+      - name: Apply Release Version (Staging)
+        if: ${{ inputs.helm_release_namespace == 'staging' }}
+        working-directory: ./development
+        run: |-
+          sed -i 's/^appVersion:.*$/appVersion: "${{ steps.force-bump-version-staging.outputs.version }}"/g' Chart.yaml
+          git add Chart.yaml
+          git commit -m 'Increment appVersion: ${{ steps.force-bump-version-staging.outputs.version }}'
           git push
