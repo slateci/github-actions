@@ -90,12 +90,20 @@ jobs:
             import semver
             
             if semver.compare("${{ inputs.prod-release-semver }}", os.environ.get('RELEASE_VERSION')) != 0:
-              raise Exception("The source appVersion in Chart.yaml does not match chosen release version.")
+              error("The source appVersion in Chart.yaml does not match chosen release version.")
 
-      - name: Compare Deployed & Source Release Versions
+      - id: compare-versions
+        name: Compare Deployed & Source Release Versions
         env:
           HELM_RELEASE_NAMESPACE: ${{ inputs.helm_release_namespace }}
           HELM_RELEASE_PREFIX: ${{ inputs.helm_release_prefix }}
         run: |-
-          curl -fsSL ${{ env.SLATE_GITHUB_ACTIONS_RAWCONTENT_URL }}/${{ env.SLATE_GITHUB_ACTIONS_BRANCH }}/scripts/semver-health.py -o semver-health.py
-          python semver-health.py
+          curl -fsSL ${{ env.SLATE_GITHUB_ACTIONS_RAWCONTENT_URL }}/${{ env.SLATE_GITHUB_ACTIONS_BRANCH }}/scripts/semver-compare.py -o semver-compare.py
+          python semver-compare.py
+
+      - name: "Release Version: Not Ahead"
+        if:  ${{ steps.compare-versions.outputs.ahead == 'false' }}
+        uses: jannekem/run-python-script-action@v1
+        with:
+          script: |
+            error("The source appVersion in Chart.yaml is not ahead of the deployed appVersion. Update the source and try again.")
