@@ -35,7 +35,7 @@ on:
 
 env:
   PRERELEASE_DATETIME_SUFFIX: "%Y%m%d-%H%M%S"
-  SLATE_GITHUB_ACTIONS_BRANCH: feature/20_investigate-release-version-automation
+  SLATE_GITHUB_ACTIONS_BRANCH: master
   SLATE_GITHUB_ACTIONS_RAWCONTENT_URL: https://raw.githubusercontent.com/slateci/github-actions
 
 jobs:
