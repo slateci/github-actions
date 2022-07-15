@@ -89,7 +89,7 @@ jobs:
             import os
             import semver
             
-            if semver.compare("${{ inputs.prod-release-semver }}", os.environ.get('RELEASE_VERSION')) != 0:
+            if semver.compare("${{ inputs.prod_release_expected }}", os.environ.get('RELEASE_VERSION')) != 0:
               error("The source appVersion in Chart.yaml does not match chosen release version.")
 
       - id: compare-versions
