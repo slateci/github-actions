@@ -65,7 +65,9 @@ jobs:
         uses: jannekem/run-python-script-action@v1
         with:
           script: |
-            error("This workflow is not appropriate for the production environment.")
+            message = "This workflow is not appropriate for the production environment."
+            error(message)
+            raise Exception(message)
 
       - name: Check out repo
         uses: actions/checkout@v3
