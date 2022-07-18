@@ -83,6 +83,19 @@ jobs:
           path: ./${{ inputs.helm_release_namespace }}
           ref: ${{ env.GIT_REF }}
 
+      - name: Check out repo develop branch (Staging)
+        if: ${{ inputs.helm_release_namespace == 'staging' }}
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          path: ./development
+          ref: refs/heads/develop
+
+      - name: Configure Git
+        run: |
+          git config --system user.name "${{ github.actor }}"
+          git config --system user.email "${{ github.actor }}@users.noreply.github.com"
+
       - name: Set Up Tools
         uses: slateci/github-actions/.github/actions/gcloud-helm-setup@master
         with:
@@ -108,12 +121,6 @@ jobs:
           do
             curl -fsSL ${{ env.SLATE_GITHUB_ACTIONS_RAWCONTENT_URL }}/${{ env.SLATE_GITHUB_ACTIONS_BRANCH }}/scripts/$FILENAME -o $FILENAME
           done
-
-      - name: Configure Git
-        working-directory: ./${{ inputs.helm_release_namespace }}
-        run: |
-          git config user.name "${{ github.actor }}"
-          git config user.email "${{ github.actor }}@users.noreply.github.com"
 
       - name: Find Release Version (Dev)
         if: ${{ inputs.helm_release_namespace == 'development' }}
@@ -174,13 +181,13 @@ jobs:
         run: |-
           sed -i 's/^appVersion:.*$/appVersion: "${{ steps.bump-version.outputs.version }}"/g' Chart.yaml
           git add Chart.yaml
-          git commit -m 'Increment appVersion: ${{ steps.bump-version.outputs.version }}'
+          git commit -m '(dev) Increment appVersion: ${{ steps.bump-version.outputs.version }}'
           git push
 
       - id: release-version-staging
         name: Apply Release Version (Staging)
         if: ${{ inputs.helm_release_namespace == 'staging' }}
-        working-directory: ./${{ inputs.helm_release_namespace }}
+        working-directory: ./development
         run: |-
           if [[ '${{ steps.compare-versions.outputs.ahead }}' -eq 'true' ]]
           then
@@ -191,30 +198,15 @@ jobs:
           
           sed -i "s/^appVersion:.*$/appVersion: \"$NEW_VERSION\"/g" Chart.yaml
           git add Chart.yaml
-          git commit -m 'Increment appVersion: ${{ env.RELEASE_VERSION }}' --allow-empty
+          git commit -m '(staging) Increment appVersion: ${{ env.RELEASE_VERSION }}' --allow-empty
           git push
           
           COMMIT_HASH=$(git log -1 --format="%H" ${{ env.GIT_REF }})
           echo "::set-output name=hash::$COMMIT_HASH"
 
-      - name: Check out repo develop branch (Staging)
-        if: ${{ inputs.helm_release_namespace == 'staging' }}
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          path: ./development
-          ref: refs/heads/develop
-
-      - name: Configure Git for develop branch (Staging)
-        if: ${{ inputs.helm_release_namespace == 'staging' }}
-        working-directory: ./development
-        run: |
-          git config user.name "${{ github.actor }}"
-          git config user.email "${{ github.actor }}@users.noreply.github.com"
-
       - name: Cherry-pick (Staging)
         if: ${{ inputs.helm_release_namespace == 'staging' }}
-        working-directory: ./development
+        working-directory: ./${{ inputs.helm_release_namespace }}
         run: |-
           git cherry-pick ${{ steps.release-version-staging.outputs.hash }} --allow-empty
           git push
@@ -253,5 +245,5 @@ jobs:
         run: |-
           sed -i 's/^appVersion:.*$/appVersion: "${{ steps.force-bump-version-staging.outputs.version }}"/g' Chart.yaml
           git add Chart.yaml
-          git commit -m 'Increment appVersion: ${{ steps.force-bump-version-staging.outputs.version }}'
+          git commit -m '(staging) Increment appVersion: ${{ steps.force-bump-version-staging.outputs.version }}'
           git push
