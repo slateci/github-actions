@@ -181,7 +181,7 @@ jobs:
         run: |-
           sed -i 's/^appVersion:.*$/appVersion: "${{ steps.bump-version.outputs.version }}"/g' Chart.yaml
           git add Chart.yaml
-          git commit -m '(dev) Increment appVersion: ${{ steps.bump-version.outputs.version }}'
+          git commit -m '(github-action) Increment appVersion: ${{ steps.bump-version.outputs.version }}'
           git push
 
       - id: release-version-staging
@@ -198,7 +198,7 @@ jobs:
           
           sed -i "s/^appVersion:.*$/appVersion: \"$NEW_VERSION\"/g" Chart.yaml
           git add Chart.yaml
-          git commit -m '(staging) Increment appVersion: ${{ env.RELEASE_VERSION }}' --allow-empty
+          git commit -m "(github-action) Increment appVersion: ${NEW_VERSION}" --allow-empty
           git push
 
       - name: Merge master to develop branch (Staging)
@@ -206,7 +206,7 @@ jobs:
         working-directory: ./development
         run: |-
           git fetch
-          git merge origin/master --commit -m '(staging) Catching up develop branch' --no-ff
+          git merge origin/master --commit -m '(github-action) Catching up develop branch' --no-ff
           git push
 
       - id: force-bump-version-staging
@@ -243,5 +243,5 @@ jobs:
         run: |-
           sed -i 's/^appVersion:.*$/appVersion: "${{ steps.force-bump-version-staging.outputs.version }}"/g' Chart.yaml
           git add Chart.yaml
-          git commit -m '(staging) Increment appVersion: ${{ steps.force-bump-version-staging.outputs.version }}'
+          git commit -m '(github-action) Increment appVersion: ${{ steps.force-bump-version-staging.outputs.version }}'
           git push
