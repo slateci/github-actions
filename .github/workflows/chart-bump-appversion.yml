@@ -187,7 +187,7 @@ jobs:
       - id: release-version-staging
         name: Apply Release Version (Staging)
         if: ${{ inputs.helm_release_namespace == 'staging' }}
-        working-directory: ./${{ inputs.helm_release_namespace }}
+        working-directory: ./development
         run: |-
           if [[ '${{ steps.compare-versions.outputs.ahead }}' == 'true' ]]
           then
@@ -201,12 +201,12 @@ jobs:
           git commit -m "(github-action) Increment appVersion: ${NEW_VERSION}"
           git push
 
-      - name: Merge master to develop branch (Staging)
+      - name: Merge develop to master branch (Staging)
         if: ${{ inputs.helm_release_namespace == 'staging' }}
-        working-directory: ./development
+        working-directory: ./${{ inputs.helm_release_namespace }}
         run: |-
           git fetch
-          git merge origin/master --commit -m '(github-action) Catching up develop branch' --no-ff
+          git merge origin/develop --commit -m '(github-action) Merge develop with master' --no-ff
           git push
 
       - id: force-bump-version-staging
