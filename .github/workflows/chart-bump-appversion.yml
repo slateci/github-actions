@@ -189,7 +189,7 @@ jobs:
         if: ${{ inputs.helm_release_namespace == 'staging' }}
         working-directory: ./${{ inputs.helm_release_namespace }}
         run: |-
-          if [[ '${{ steps.compare-versions.outputs.ahead }}' -eq 'true' ]]
+          if [[ '${{ steps.compare-versions.outputs.ahead }}' == 'true' ]]
           then
             NEW_VERSION="${{ env.RELEASE_VERSION }}"
           else
