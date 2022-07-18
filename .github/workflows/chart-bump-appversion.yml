@@ -201,13 +201,14 @@ jobs:
           git commit -m '(staging) Increment appVersion: ${{ env.RELEASE_VERSION }}' --allow-empty
           git push
           
-          COMMIT_HASH=$(git log -1 --format="%H" ${{ env.GIT_REF }})
+          COMMIT_HASH=$(git log -1 --format="%H" refs/heads/develop)
           echo "::set-output name=hash::$COMMIT_HASH"
 
-      - name: Cherry-pick (Staging)
+      - name: Cherry-pick to master branch (Staging)
         if: ${{ inputs.helm_release_namespace == 'staging' }}
         working-directory: ./${{ inputs.helm_release_namespace }}
         run: |-
+          git fetch
           git cherry-pick ${{ steps.release-version-staging.outputs.hash }} --allow-empty
           git push
 
