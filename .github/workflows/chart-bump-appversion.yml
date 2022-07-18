@@ -14,7 +14,7 @@ on:
         required: true
         type: string
       python_packages:
-        description: The pip packages to install.
+        description: The pip packages to use.
         required: false
         default: |
           pyyaml==6.0
@@ -187,7 +187,7 @@ jobs:
       - id: release-version-staging
         name: Apply Release Version (Staging)
         if: ${{ inputs.helm_release_namespace == 'staging' }}
-        working-directory: ./development
+        working-directory: ./${{ inputs.helm_release_namespace }}
         run: |-
           if [[ '${{ steps.compare-versions.outputs.ahead }}' -eq 'true' ]]
           then
@@ -200,16 +200,13 @@ jobs:
           git add Chart.yaml
           git commit -m '(staging) Increment appVersion: ${{ env.RELEASE_VERSION }}' --allow-empty
           git push
-          
-          COMMIT_HASH=$(git log -1 --format="%H" refs/heads/develop)
-          echo "::set-output name=hash::$COMMIT_HASH"
 
-      - name: Cherry-pick to master branch (Staging)
+      - name: Merge master to develop branch (Staging)
         if: ${{ inputs.helm_release_namespace == 'staging' }}
-        working-directory: ./${{ inputs.helm_release_namespace }}
+        working-directory: ./development
         run: |-
           git fetch
-          git cherry-pick ${{ steps.release-version-staging.outputs.hash }} --allow-empty
+          git merge origin/master -m '(staging) Catching up develop branch' --commit
           git push
 
       - id: force-bump-version-staging
