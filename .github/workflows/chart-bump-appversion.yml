@@ -206,7 +206,7 @@ jobs:
         working-directory: ./development
         run: |-
           git fetch
-          git merge origin/master -m '(staging) Catching up develop branch' --commit
+          git merge origin/master --commit -m '(staging) Catching up develop branch' --no-ff
           git push
 
       - id: force-bump-version-staging
