@@ -191,9 +191,9 @@ jobs:
         run: |-
           if [[ '${{ steps.compare-versions.outputs.ahead }}' == 'true' ]]
           then
-            echo "NEW_RELEASE_VERSION=${{ env.RELEASE_VERSION }}" >> $GITHUB_ENV
+            echo 'NEW_RELEASE_VERSION="${{ env.RELEASE_VERSION }}"' >> $GITHUB_ENV
           else
-            echo "NEW_RELEASE_VERSION=${{ steps.bump-version.outputs.version }}" >> $GITHUB_ENV
+            echo 'NEW_RELEASE_VERSION="${{ steps.bump-version.outputs.version }}"' >> $GITHUB_ENV
           fi
           
           sed -i "s/^appVersion:.*$/appVersion: \"${{ env.NEW_RELEASE_VERSION }}\"/g" Chart.yaml
@@ -218,7 +218,7 @@ jobs:
         working-directory: ./${{ inputs.helm_release_namespace }}
         run: |-
           git fetch
-          git tag -a v${{ env.NEW_RELEASE_VERSION }} ${{ steps.merge-staging.outputs.hash }}
+          git tag v${{ env.NEW_RELEASE_VERSION }} ${{ steps.merge-staging.outputs.hash }}
           git push
 
       - id: force-bump-version-staging
