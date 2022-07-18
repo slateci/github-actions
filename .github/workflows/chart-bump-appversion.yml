@@ -198,7 +198,7 @@ jobs:
           
           sed -i "s/^appVersion:.*$/appVersion: \"$NEW_VERSION\"/g" Chart.yaml
           git add Chart.yaml
-          git commit -m "(github-action) Increment appVersion: ${NEW_VERSION}" --allow-empty
+          git commit -m "(github-action) Increment appVersion: ${NEW_VERSION}"
           git push
 
       - name: Merge master to develop branch (Staging)
