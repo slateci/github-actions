@@ -191,22 +191,34 @@ jobs:
         run: |-
           if [[ '${{ steps.compare-versions.outputs.ahead }}' == 'true' ]]
           then
-            NEW_VERSION="${{ env.RELEASE_VERSION }}"
+            echo "NEW_RELEASE_VERSION=${{ env.RELEASE_VERSION }}" >> $GITHUB_ENV
           else
-            NEW_VERSION="${{ steps.bump-version.outputs.version }}"
+            echo "NEW_RELEASE_VERSION=${{ steps.bump-version.outputs.version }}" >> $GITHUB_ENV
           fi
           
-          sed -i "s/^appVersion:.*$/appVersion: \"$NEW_VERSION\"/g" Chart.yaml
+          sed -i "s/^appVersion:.*$/appVersion: \"${{ env.NEW_RELEASE_VERSION }}\"/g" Chart.yaml
           git add Chart.yaml
-          git commit -m "(github-action) Increment appVersion: ${NEW_VERSION}"
+          git commit -m "(github-action) Increment appVersion: ${{ env.NEW_RELEASE_VERSION }}"
           git push
 
-      - name: Merge develop to master branch (Staging)
+      - id: merge-staging
+        name: Merge develop to master branch (Staging)
         if: ${{ inputs.helm_release_namespace == 'staging' }}
         working-directory: ./${{ inputs.helm_release_namespace }}
         run: |-
           git fetch
-          git merge origin/develop --commit -m '(github-action) Merge develop with master' --no-ff
+          git merge origin/develop --commit -m '(github-action) Merge develop with master for: ${{ env.NEW_RELEASE_VERSION }}' --no-ff
+          git push
+          
+          COMMIT_HASH=$(git log -1 --format="%H" ${{ env.GIT_REF }})
+          echo "::set-output name=hash::$COMMIT_HASH"
+
+      - name: Tag Release Candidate (Staging)
+        if: ${{ inputs.helm_release_namespace == 'staging' }}
+        working-directory: ./${{ inputs.helm_release_namespace }}
+        run: |-
+          git fetch
+          git tag -a v${{ env.NEW_RELEASE_VERSION }} ${{ steps.merge-staging.outputs.hash }}
           git push
 
       - id: force-bump-version-staging
