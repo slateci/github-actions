@@ -196,10 +196,10 @@ jobs:
             NEW_VER="${{ steps.bump-version.outputs.version }}"
           fi
           
-          echo "NEW_RELEASE_VERSION="\${NEW_VER}\"" >> $GITHUB_ENV
-          sed -i "s/^appVersion:.*$/appVersion: \"${NEW_VER}\"/g" Chart.yaml
+          echo "NEW_RELEASE_VERSION=${NEW_VER}" >> $GITHUB_ENV
+          sed -i "s/^appVersion:.*$/appVersion: '${NEW_VER}'/g" Chart.yaml
           git add Chart.yaml
-          git commit -m "github-action -- Increment appVersion: ${NEW_VER}"
+          git commit -m "(github-action) Increment appVersion: ${NEW_VER}"
           git push
 
       - id: merge-staging
