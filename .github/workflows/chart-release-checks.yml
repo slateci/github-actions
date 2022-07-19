@@ -96,6 +96,7 @@ jobs:
 
       - id: compare-versions
         name: Compare Deployed & Source Release Versions
+        if: ${{ inputs.helm_release_namespace != 'production' }}
         env:
           HELM_RELEASE_NAMESPACE: ${{ inputs.helm_release_namespace }}
           HELM_RELEASE_PREFIX: ${{ inputs.helm_release_prefix }}
@@ -104,7 +105,7 @@ jobs:
           python semver-compare.py
 
       - name: "Release Version: Not Ahead"
-        if:  ${{ steps.compare-versions.outputs.ahead == 'false' }}
+        if:  ${{ inputs.helm_release_namespace != 'production' && steps.compare-versions.outputs.ahead == 'false' }}
         uses: jannekem/run-python-script-action@v1
         with:
           script: |
