@@ -220,7 +220,7 @@ jobs:
         run: |-
           git fetch
           git tag v${{ env.NEW_RELEASE_VERSION }} ${{ steps.merge-staging.outputs.hash }}
-          git push
+          git push origin v${{ env.NEW_RELEASE_VERSION }}
 
 # TODO: Only do the following if dev is behind staging...
 
