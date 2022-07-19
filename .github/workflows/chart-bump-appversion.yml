@@ -181,7 +181,7 @@ jobs:
         run: |-
           sed -i 's/^appVersion:.*$/appVersion: "${{ steps.bump-version.outputs.version }}"/g' Chart.yaml
           git add Chart.yaml
-          git commit -m 'github-action -- Increment appVersion: ${{ steps.bump-version.outputs.version }}'
+          git commit -m '(github-action) Increment appVersion: ${{ steps.bump-version.outputs.version }}'
           git push
 
       - id: release-version-staging
@@ -208,7 +208,7 @@ jobs:
         working-directory: ./${{ inputs.helm_release_namespace }}
         run: |-
           git fetch
-          git merge origin/develop --commit -m 'github-action -- Merge develop with master for: ${{ env.NEW_RELEASE_VERSION }}' --no-ff
+          git merge origin/develop --commit -m '(github-action) Merge develop with master for: ${{ env.NEW_RELEASE_VERSION }}' --no-ff
           git push
           
           COMMIT_HASH=$(git log -1 --format="%H" ${{ env.GIT_REF }})
@@ -258,5 +258,5 @@ jobs:
         run: |-
           sed -i 's/^appVersion:.*$/appVersion: "${{ steps.force-bump-version-staging.outputs.version }}"/g' Chart.yaml
           git add Chart.yaml
-          git commit -m 'github-action -- Increment appVersion: ${{ steps.force-bump-version-staging.outputs.version }}'
+          git commit -m '(github-action) Increment appVersion: ${{ steps.force-bump-version-staging.outputs.version }}'
           git push
