@@ -13,6 +13,13 @@ on:
         description: The prefix used for the Helm release, e.g. 'slate-portal', 'slate-api'.
         required: true
         type: string
+      python_packages:
+        description: The pip packages to use.
+        required: false
+        default: |
+          pyyaml==6.0
+          semver==2.13.0
+        type: string
       python_version:
         description: The version of Python to use, e.g. 3.9.
         required: false
@@ -76,6 +83,19 @@ jobs:
           path: ./${{ inputs.helm_release_namespace }}
           ref: ${{ env.GIT_REF }}
 
+      - name: Check out repo develop branch (Staging)
+        if: ${{ inputs.helm_release_namespace == 'staging' }}
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          path: ./development
+          ref: refs/heads/develop
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+
       - name: Set Up Tools
         uses: slateci/github-actions/.github/actions/gcloud-helm-setup@master
         with:
@@ -92,9 +112,7 @@ jobs:
       - name: Install Python packages
         uses: BSFishy/pip-action@v1
         with:
-          packages: |
-            pyyaml==6.0
-            semver==2.13.0
+          packages: ${{ inputs.python_packages }}
 
       - name: Download workflow dependencies
         run: |-
@@ -103,12 +121,6 @@ jobs:
           do
             curl -fsSL ${{ env.SLATE_GITHUB_ACTIONS_RAWCONTENT_URL }}/${{ env.SLATE_GITHUB_ACTIONS_BRANCH }}/scripts/$FILENAME -o $FILENAME
           done
-
-      - name: Configure Git
-        working-directory: ./${{ inputs.helm_release_namespace }}
-        run: |
-          git config user.name "${{ github.actor }}"
-          git config user.email "${{ github.actor }}@users.noreply.github.com"
 
       - name: Find Release Version (Dev)
         if: ${{ inputs.helm_release_namespace == 'development' }}
@@ -169,50 +181,48 @@ jobs:
         run: |-
           sed -i 's/^appVersion:.*$/appVersion: "${{ steps.bump-version.outputs.version }}"/g' Chart.yaml
           git add Chart.yaml
-          git commit -m 'Increment appVersion: ${{ steps.bump-version.outputs.version }}'
+          git commit -m '(github-action) Increment appVersion: ${{ steps.bump-version.outputs.version }}'
           git push
 
       - id: release-version-staging
         name: Apply Release Version (Staging)
         if: ${{ inputs.helm_release_namespace == 'staging' }}
-        working-directory: ./${{ inputs.helm_release_namespace }}
+        working-directory: ./development
         run: |-
-          if [[ '${{ steps.compare-versions.outputs.ahead }}' -eq 'true' ]]
+          if [[ '${{ steps.compare-versions.outputs.ahead }}' == 'true' ]]
           then
-            NEW_VERSION="${{ env.RELEASE_VERSION }}"
+            NEW_VER="${{ env.RELEASE_VERSION }}"
           else
-            NEW_VERSION="${{ steps.bump-version.outputs.version }}"
+            NEW_VER="${{ steps.bump-version.outputs.version }}"
           fi
           
-          sed -i "s/^appVersion:.*$/appVersion: \"$NEW_VERSION\"/g" Chart.yaml
+          echo "NEW_RELEASE_VERSION=${NEW_VER}" >> $GITHUB_ENV
+          sed -i "s/^appVersion:.*$/appVersion: '${NEW_VER}'/g" Chart.yaml
           git add Chart.yaml
-          git commit -m 'Increment appVersion: ${{ env.RELEASE_VERSION }}' --allow-empty
+          git commit -m "(github-action) Increment appVersion: ${NEW_VER}"
+          git push
+
+      - id: merge-staging
+        name: Merge develop to master branch (Staging)
+        if: ${{ inputs.helm_release_namespace == 'staging' }}
+        working-directory: ./${{ inputs.helm_release_namespace }}
+        run: |-
+          git fetch
+          git merge origin/develop --commit -m '(github-action) Merge develop with master for: ${{ env.NEW_RELEASE_VERSION }}' --no-ff
           git push
           
           COMMIT_HASH=$(git log -1 --format="%H" ${{ env.GIT_REF }})
           echo "::set-output name=hash::$COMMIT_HASH"
 
-      - name: Check out repo develop branch (Staging)
+      - name: Tag Release Candidate (Staging)
         if: ${{ inputs.helm_release_namespace == 'staging' }}
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          path: ./development
-          ref: refs/heads/develop
-
-      - name: Configure Git for develop branch (Staging)
-        if: ${{ inputs.helm_release_namespace == 'staging' }}
-        working-directory: ./development
-        run: |
-          git config user.name "${{ github.actor }}"
-          git config user.email "${{ github.actor }}@users.noreply.github.com"
-
-      - name: Cherry-pick (Staging)
-        if: ${{ inputs.helm_release_namespace == 'staging' }}
-        working-directory: ./development
+        working-directory: ./${{ inputs.helm_release_namespace }}
         run: |-
-          git cherry-pick ${{ steps.release-version-staging.outputs.hash }} --allow-empty
-          git push
+          git fetch
+          git tag v${{ env.NEW_RELEASE_VERSION }} ${{ steps.merge-staging.outputs.hash }}
+          git push origin v${{ env.NEW_RELEASE_VERSION }}
+
+# TODO: Only do the following if dev is behind staging...
 
       - id: force-bump-version-staging
         name: Force-bump Release Version on develop branch (Staging)
@@ -248,5 +258,5 @@ jobs:
         run: |-
           sed -i 's/^appVersion:.*$/appVersion: "${{ steps.force-bump-version-staging.outputs.version }}"/g' Chart.yaml
           git add Chart.yaml
-          git commit -m 'Increment appVersion: ${{ steps.force-bump-version-staging.outputs.version }}'
+          git commit -m '(github-action) Increment appVersion: ${{ steps.force-bump-version-staging.outputs.version }}'
           git push
