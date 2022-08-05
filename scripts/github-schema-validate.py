@@ -26,7 +26,7 @@ else:
     logging.getLogger().setLevel(logging.INFO)
 
 
-def find_files(path) -> list:
+def find_files(path: str) -> list:
     """
     Find the list of files given a path pattern.
     :param path: the path to search
