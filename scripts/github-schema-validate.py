@@ -2,7 +2,7 @@
 
 """
 This is a script to validate the schemas for the GitHub action and workflow YAML files and uses
-the YAML 1.2 compliant ``ruamel.yaml`` package (necessary to revent ``on:`` from being converted to
+the YAML 1.2 compliant ``ruamel.yaml`` package (necessary to prevent ``on:`` from being converted to
 ``True:``, etc.).
 
 This script uses the following system environmental variables as inputs:
