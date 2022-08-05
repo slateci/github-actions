@@ -42,7 +42,7 @@ on:
 
 env:
   PRERELEASE_DATETIME_SUFFIX: "%Y%m%d-%H%M%S"
-  SLATE_GITHUB_ACTIONS_BRANCH: master
+  SLATE_GITHUB_ACTIONS_BRANCHORTAG: v1
   SLATE_GITHUB_ACTIONS_RAWCONTENT_URL: https://raw.githubusercontent.com/slateci/github-actions
 
 jobs:
@@ -119,7 +119,7 @@ jobs:
           # Python files
           for FILENAME in semver-bump.py semver-compare.py
           do
-            curl -fsSL ${{ env.SLATE_GITHUB_ACTIONS_RAWCONTENT_URL }}/${{ env.SLATE_GITHUB_ACTIONS_BRANCH }}/scripts/$FILENAME -o $FILENAME
+            curl -fsSL ${{ env.SLATE_GITHUB_ACTIONS_RAWCONTENT_URL }}/${{ env.SLATE_GITHUB_ACTIONS_BRANCHORTAG }}/scripts/$FILENAME -o $FILENAME
           done
 
       - name: Find Release Version (Dev)
