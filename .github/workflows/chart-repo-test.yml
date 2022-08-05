@@ -40,12 +40,6 @@ on:
         default: master
         type: string
 
-env:
-  CT_chart_yaml_schema: ${{ inputs.chart_yaml_schema }}
-  CT_config: ${{ inputs.config }}
-  CT_lint_conf: ${{ inputs.lint_conf }}
-  CT_target_branch: ${{ inputs.target_branch }}
-
 jobs:
   ct-lint:
     name: Lint
@@ -82,4 +76,9 @@ jobs:
           fi
 
       - name: Run chart-testing (lint)
-        run: ct lint
+        run: |-
+          ct lint \
+            --chart-yaml-schema ${{ inputs.chart_yaml_schema }} \
+            --config ${{ inputs.config }} \
+            --lint-conf ${{ inputs.lint_conf }} \
+            --target-branch ${{ inputs.target_branch }}
