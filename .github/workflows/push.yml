@@ -1,0 +1,57 @@
+# Note: Used by this GitHub repository.
+
+name: "Check GitHub YAML files"
+
+on:
+#  pull_request:
+#    branches:
+#      - master
+  push:
+    branches:
+      - feature/54_switch-to-v1-tags-in-raw-script-downloads
+#      - master
+
+env:
+  PYTHON_VERSION: 3.9
+  SLATE_GITHUB_ACTIONS_BRANCHORTAG: feature/54_switch-to-v1-tags-in-raw-script-downloads
+  SLATE_GITHUB_ACTIONS_RAWCONTENT_URL: https://raw.githubusercontent.com/slateci/github-actions
+
+jobs:
+  checks:
+    name: Checks
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          path: ./checkout
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Python packages
+        uses: BSFishy/pip-action@v1
+        with:
+          packages: |
+            jsonschema==4.9.1
+            ruamel.yaml==0.17.21
+            requests==2.27.1
+
+      - name: Download workflow dependencies
+        run: |-
+          # Python files
+          for FILENAME in github-schema-validate.py
+          do
+            curl -fsSL ${{ env.SLATE_GITHUB_ACTIONS_RAWCONTENT_URL }}/${{ env.SLATE_GITHUB_ACTIONS_BRANCHORTAG }}/scripts/$FILENAME -o $FILENAME
+          done
+           
+      - name: Validate Schemas
+        working-directory: .
+        env:
+          GITHUB_YAML_PATH: './checkout/.github'
+        run: |-
+          python github-schema-validate.py

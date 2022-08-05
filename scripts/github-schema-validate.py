@@ -60,33 +60,39 @@ def get_jsonschema_workflow() -> json:
     return result
 
 
+def validate_schemas(pathpattern: str, schema: dict) -> None:
+    """
+    Validates the schemas for the found YAML files
+    :param pathpattern: the path to search
+    :param schema: the schema
+    :return: None
+    """
+    files = find_files(pathpattern)
+    logging.info(f"Found the GitHub files:\n{files}")
+
+    for file in files:
+        with open(file) as stream:
+            logging.info(f"Checking GitHub schema for: {file}")
+            yaml = YAML(typ='safe')
+            data_loaded = yaml.load(stream)
+            logging.debug(f"Data loaded:\n{data_loaded}")
+            jsonschema.validate(data_loaded, schema)
+
+
 # Main:
 if __name__ == '__main__':
     github_yaml_path = os.environ.get('GITHUB_YAML_PATH')
-    logging.info(f"Beginning search for GitHub YAML files at: {github_yaml_path}")
 
     # Action files:
-    action_files = find_files(os.path.join(github_yaml_path, "actions", "**", "*.yml"))
-    logging.info(f"Found the GitHub action files:\n{action_files}")
-
     action_schema = get_jsonschema_action()
-    for action_file in action_files:
-        with open(action_file) as stream:
-            logging.info(f"Checking GitHub action schema for: {action_file}")
-            yaml = YAML(typ='safe')
-            data_loaded = yaml.load(stream)
-            logging.info(f"Data loaded:\n{data_loaded}")
-            jsonschema.validate(data_loaded, action_schema)
+    action_path = os.path.join(github_yaml_path, "actions", "**", "*.yml")
+    logging.info(f"Validating GitHub action files at: {action_path}")
+    validate_schemas(action_path, action_schema)
 
     # Workflow files:
-    workflow_files = find_files(os.path.join(github_yaml_path, "workflows", "*.yml"))
-    logging.info(f"Found the GitHub workflow files:\n{workflow_files}")
-
     workflow_schema = get_jsonschema_workflow()
-    for workflow_file in workflow_files:
-        with open(workflow_file) as stream:
-            logging.info(f"Checking GitHub workflow schema for: {workflow_file}")
-            yaml = YAML(typ='safe')
-            data_loaded = yaml.load(stream)
-            logging.info(f"Data loaded:\n{data_loaded}")
-            jsonschema.validate(data_loaded, workflow_schema)
+    workflow_path = os.path.join(github_yaml_path, "workflows", "*.yml")
+    logging.info(f"Validating GitHub action files at: {workflow_path}")
+    validate_schemas(workflow_path, workflow_schema)
+
+    logging.info("SUCCESS!")
