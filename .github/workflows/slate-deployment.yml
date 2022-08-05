@@ -44,7 +44,7 @@ on:
         required: true
 
 env:
-  SLATE_GITHUB_ACTIONS_BRANCH: master
+  SLATE_GITHUB_ACTIONS_BRANCHORTAG: v1
   SLATE_GITHUB_ACTIONS_RAWCONTENT_URL: https://raw.githubusercontent.com/slateci/github-actions
 
 jobs:
@@ -110,14 +110,14 @@ jobs:
           # Python files
           for FILENAME in generate-mail-body.py mailgun.py slate-instance-push-updates.py
           do
-            curl -fsSL ${{ env.SLATE_GITHUB_ACTIONS_RAWCONTENT_URL }}/${{ env.SLATE_GITHUB_ACTIONS_BRANCH }}/scripts/$FILENAME -o $FILENAME
+            curl -fsSL ${{ env.SLATE_GITHUB_ACTIONS_RAWCONTENT_URL }}/${{ env.SLATE_GITHUB_ACTIONS_BRANCHORTAG }}/scripts/$FILENAME -o $FILENAME
           done
           
           # Jinja2 templates
           mkdir -p ./templates
           for FILENAME in email_template_html.j2 email_template_text.j2
           do
-            curl -fsSL ${{ env.SLATE_GITHUB_ACTIONS_RAWCONTENT_URL }}/${{ env.SLATE_GITHUB_ACTIONS_BRANCH }}/templates/$FILENAME -o ./templates/$FILENAME
+            curl -fsSL ${{ env.SLATE_GITHUB_ACTIONS_RAWCONTENT_URL }}/${{ env.SLATE_GITHUB_ACTIONS_BRANCHORTAG }}/templates/$FILENAME -o ./templates/$FILENAME
           done
 
       - id: deploy
