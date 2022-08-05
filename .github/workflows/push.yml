@@ -3,17 +3,16 @@
 name: "Check GitHub YAML files"
 
 on:
-#  pull_request:
-#    branches:
-#      - master
+  pull_request:
+    branches:
+      - master
   push:
     branches:
-      - feature/54_switch-to-v1-tags-in-raw-script-downloads
-#      - master
+      - master
 
 env:
   PYTHON_VERSION: 3.9
-  SLATE_GITHUB_ACTIONS_BRANCHORTAG: feature/54_switch-to-v1-tags-in-raw-script-downloads
+  SLATE_GITHUB_ACTIONS_BRANCHORTAG: master
   SLATE_GITHUB_ACTIONS_RAWCONTENT_URL: https://raw.githubusercontent.com/slateci/github-actions
 
 jobs:
