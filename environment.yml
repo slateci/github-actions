@@ -1,0 +1,13 @@
+# conda env create --file environment.yml
+name: github-actions
+channels:
+  - defaults
+dependencies:
+  - pip=21.2.4
+  - python=3.9.12
+  - pip:
+      - jinja2==3.1.2
+      - jsonschema==4.9.1
+      - pyyaml==6.0
+      - requests==2.27.1
+      - semver==2.13.0
