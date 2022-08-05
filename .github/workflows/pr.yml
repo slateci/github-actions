@@ -9,7 +9,8 @@ on:
       - feature/54_switch-to-v1-tags-in-raw-script-downloads
 
 env:
-  SCHEMA_URL: https://github.com/SchemaStore/schemastore/blob/master/src/schemas/json/github-workflow.json
+  SCHEMASTORE_BRANCHORTAG: master
+  SCHEMASTORE_RAWCONTENT_URL: https://raw.githubusercontent.com/SchemaStore/schemastore
 
 jobs:
   schema:
@@ -23,12 +24,15 @@ jobs:
           fetch-depth: 0
           path: ./checkout
 
-      - name: Download schema
+      - name: Download schemas
         run: |-
-          curl -fsSL ${{ env.SCHEMA_URL }} -o github-workflow.json
+          for FILENAME in github-action.json github-workflow.json
+          do
+          curl -fsSL ${{ env.SCHEMASTORE_RAWCONTENT_URL }}/${{ env.SCHEMASTORE_BRANCHORTAG }}/src/schemas/json/$FILENAME -o $FILENAME
+          done
 
-      - name: Validate schema
+      - name: Validate action schemas
         uses: nrkno/yaml-schema-validator-github-action@v4
         with:
-          schema: ./github-workflow.json
-          target: ./checkout/.github/**/*.yml
+          schema: ./github-action.json
+          target: ./checkout/.github/actions/gcloud-helm-setup/action.yml
