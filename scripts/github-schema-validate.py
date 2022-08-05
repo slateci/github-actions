@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
 """
-This is a script to validate the schemas for the GitHub action and workflow YAML files.
+This is a script to validate the schemas for the GitHub action and workflow YAML files and uses
+the YAML 1.2 compliant ``ruamel.yaml`` package (necessary to revent ``on:`` from being converted to
+``True:``, etc.).
 
 This script uses the following system environmental variables as inputs:
 
@@ -14,7 +16,8 @@ import json
 import jsonschema
 import os
 import requests
-import yaml
+
+from ruamel.yaml import YAML
 
 # Set up logging:
 if 'DEBUG' in os.environ and os.environ['DEBUG'] == 'TRUE':
@@ -39,10 +42,9 @@ def get_jsonschema_action() -> json:
     :return: the schema as a json object
     """
 
-    response = requests.get(
-        'https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/github-action.json')
+    response = requests.get('https://json.schemastore.org/github-action.json')
     result = json.loads(response.text)
-    logging.debug(f"Found the GitHub action JSON schema:\n{result}")
+    logging.info("Found the GitHub action JSON schema.")
     return result
 
 
@@ -52,10 +54,9 @@ def get_jsonschema_workflow() -> json:
     :return: the schema as a json object
     """
 
-    response = requests.get(
-        'https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/github-workflow.json')
+    response = requests.get('https://json.schemastore.org/github-workflow.json')
     result = json.loads(response.text)
-    logging.debug(f"Found the GitHub workflow JSON schema:\n{result}")
+    logging.info("Found the GitHub workflow JSON schema.")
     return result
 
 
@@ -71,11 +72,10 @@ if __name__ == '__main__':
     action_schema = get_jsonschema_action()
     for action_file in action_files:
         with open(action_file) as stream:
-            logging.debug(f"Checking GitHub action schema for: {action_file}")
-            try:
-                data_loaded = yaml.safe_load(stream)
-            except yaml.YAMLError as ex:
-                raise ex
+            logging.info(f"Checking GitHub action schema for: {action_file}")
+            yaml = YAML(typ='safe')
+            data_loaded = yaml.load(stream)
+            logging.info(f"Data loaded:\n{data_loaded}")
             jsonschema.validate(data_loaded, action_schema)
 
     # Workflow files:
@@ -85,9 +85,8 @@ if __name__ == '__main__':
     workflow_schema = get_jsonschema_workflow()
     for workflow_file in workflow_files:
         with open(workflow_file) as stream:
-            logging.debug(f"Checking GitHub workflow schema for: {workflow_file}")
-            try:
-                data_loaded = yaml.safe_load(stream)
-            except yaml.YAMLError as ex:
-                raise ex
+            logging.info(f"Checking GitHub workflow schema for: {workflow_file}")
+            yaml = YAML(typ='safe')
+            data_loaded = yaml.load(stream)
+            logging.info(f"Data loaded:\n{data_loaded}")
             jsonschema.validate(data_loaded, workflow_schema)
