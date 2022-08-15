@@ -11,6 +11,11 @@ on:
         description: The prefix used for the Helm release, e.g. 'slate-portal', 'slate-api'.
         required: true
         type: string
+      helm_working_directory:
+        description: The relative directory where Helm commands will execute.
+        required: false
+        default: "."
+        type: string
 
     secrets:
       gc_compute_zone:
@@ -64,6 +69,7 @@ jobs:
           workload_identity_provider: ${{ secrets.gc_workload_identity_provider }}
 
       - name: Deploy the Helm chart
+        working-directory: ${{ inputs.helm_working_directory }}
         run: |-
           helm secrets upgrade ${{ inputs.helm_release_prefix }}-${{ env.HELM_RELEASE_NAMESPACE_SHORTHAND }} . \
           --set dockerImageTag=${{ env.RELEASE_VERSION }} \
