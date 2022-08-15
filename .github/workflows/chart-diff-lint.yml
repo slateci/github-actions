@@ -7,6 +7,11 @@ on:
         description: The prefix used for the Helm release, e.g. 'slate-portal', 'slate-api'.
         required: true
         type: string
+      helm_working_directory:
+        description: The relative directory where Helm commands will execute.
+        required: false
+        default: "."
+        type: string
 
     secrets:
       gc_compute_zone:
@@ -48,6 +53,7 @@ jobs:
 
       - name: Diff the DEV chart
         if: ${{ github.ref }} == 'refs/heads/develop'
+        working-directory: ${{ inputs.helm_working_directory }}
         run: |-
           helm secrets diff upgrade ${{ inputs.helm_release_prefix }}-dev . \
           -f ./vars/dev/secrets.yml \
@@ -57,6 +63,7 @@ jobs:
           -n development
 
       - name: Diff the STAGING chart
+        working-directory: ${{ inputs.helm_working_directory }}
         run: |-
           helm secrets diff upgrade ${{ inputs.helm_release_prefix }}-staging . \
           -f ./vars/staging/secrets.yml \
@@ -66,6 +73,7 @@ jobs:
           -n staging
 
       - name: Diff the PROD chart
+        working-directory: ${{ inputs.helm_working_directory }}
         run: |-
           helm secrets diff upgrade ${{ inputs.helm_release_prefix }}-prod . \
           -f ./vars/prod/secrets.yml \
@@ -77,6 +85,7 @@ jobs:
 
       - name: Lint the DEV chart
         if: ${{ github.ref }} == 'refs/heads/develop'
+        working-directory: ${{ inputs.helm_working_directory }}
         run: |-
           helm secrets lint . \
           -f ./vars/dev/secrets.yml \
@@ -85,6 +94,7 @@ jobs:
           -f ./vars/values.yml
           
       - name: Lint the STAGING chart
+        working-directory: ${{ inputs.helm_working_directory }}
         run: |-
           helm secrets lint . \
           -f ./vars/staging/secrets.yml \
@@ -93,6 +103,7 @@ jobs:
           -f ./vars/values.yml
 
       - name: Lint the PROD chart
+        working-directory: ${{ inputs.helm_working_directory }}
         run: |-
           helm secrets lint . \
           -f ./vars/prod/secrets.yml \
