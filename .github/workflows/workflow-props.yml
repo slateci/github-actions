@@ -7,6 +7,11 @@ on:
         description: Kubernetes namespace corresponding to a Helm release, e.g. 'development'.
         required: true
         type: string
+      helm_working_directory:
+        description: The relative directory where Helm commands will execute.
+        required: false
+        default: "."
+        type: string
       prod_git_ref:
         description: The git ref to use when deployment to production, e.g. '/refs/tags/v1.0.4'.
         required: false
@@ -65,7 +70,7 @@ jobs:
           script: |
             import yaml
             
-            with open("Chart.yaml") as stream:
+            with open("${{ inputs.helm_working_directory }}/Chart.yaml") as stream:
               try:
                 data_loaded = yaml.safe_load(stream)
               except yaml.YAMLError as ex:
