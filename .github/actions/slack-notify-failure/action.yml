@@ -6,6 +6,9 @@ inputs:
     description: The ID of the Slack channel to post the message.
     required: false
     default: 'github-actions'
+  slack_bot_token:
+    description: The token for the Slack Bot application.
+    required: true
 
 runs:
   using: composite
@@ -13,7 +16,7 @@ runs:
   steps:
     - name: Post message
       env:
-        SLACK_BOT_TOKEN: ${{ secrets.SLACK_NOTIFICATIONS_BOT_TOKEN }}
+        SLACK_BOT_TOKEN: ${{ inputs.slack_bot_token }}
       uses: voxmedia/github-action-slack-notify-build@v1
       with:
         channel: ${{ inputs.channel_id }}
