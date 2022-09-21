@@ -33,6 +33,10 @@ jobs:
     name: Build/push image
     runs-on: ubuntu-20.04
 
+    permissions:
+      contents: write
+      id-token: write
+
     steps:
       - name: Download Shared Workflow Properties
         uses: actions/download-artifact@v3
@@ -55,7 +59,8 @@ jobs:
           username: "${{ secrets.cr_username }}"
           password: "${{ secrets.cr_password }}"
 
-      - name: Check out repo
+      - id: checkout
+        name: Check out repo
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
@@ -72,3 +77,11 @@ jobs:
           target: release-stage
           push: true
           tags: "${{ inputs.cr_domain }}/slate/${{ inputs.cr_repository }}:${{ env.RELEASE_VERSION }}"
+
+      - name: Apply release tag to source
+        working-directory: .
+        run: |-
+          git fetch
+          COMMIT_HASH=$(git log -1 --format="%H" ${{ env.GIT_REF }})
+          git tag v${{ env.RELEASE_VERSION }} $COMMIT_HASH
+          git push origin v${{ env.RELEASE_VERSION }}
