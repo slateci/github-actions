@@ -59,14 +59,18 @@ jobs:
           username: "${{ secrets.cr_username }}"
           password: "${{ secrets.cr_password }}"
 
-      - id: checkout
-        name: Check out repo
+      - name: Check out repo
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
           path: .
           ref: ${{ env.GIT_REF }}
           repository: ${{ inputs.repository }}
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
 
       - name: Build/push image to CR
         uses: docker/build-push-action@v3
