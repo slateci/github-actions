@@ -27,7 +27,7 @@ else:
 
 def get_instance_id(cluster: str, app: str, retries: int = None) -> Optional[str]:
     """
-    Try to get instance id fo0r a service started at a given slate site
+    Try to get instance id for a service started at a given slate site
 
     :param app: application name to query
     :param cluster: slate cluster to query
@@ -225,13 +225,14 @@ for Entry in ChangedFiles:
         else:
             logging.error("Encountered error while adding instance")
             logging.error(f"Got a {response.status_code} from the server")
-            logging.error("Processing next entry")
-            continue
+            logging.error("Exiting with error")
+            sys.exit(1)
     # Create a new instance
     elif FileStatus == "A":
         if not add_instance():
             logging.error("Got error while adding new instance, processing next entry")
-            continue
+            logging.error("Exiting with error")
+            sys.exit(1)
     # Remove an instance
     elif FileStatus == "D":
         logging.warning("Deletion is not implemented. Your instance is still running in SLATE despite file deletion.")
