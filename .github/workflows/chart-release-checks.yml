@@ -36,6 +36,7 @@ on:
         required: true
 
 env:
+  HELM_SECRETS_BACKEND: vals
   SLATE_GITHUB_ACTIONS_BRANCHORTAG: v6
   SLATE_GITHUB_ACTIONS_RAWCONTENT_URL: https://raw.githubusercontent.com/slateci/github-actions
 

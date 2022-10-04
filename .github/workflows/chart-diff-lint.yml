@@ -27,6 +27,9 @@ on:
         description: The Google Cloud Workload Identity Provider (WIP).
         required: true
 
+env:
+  HELM_SECRETS_BACKEND: vals
+
 jobs:
   diff-lint:
     name: Helm Diff/Lint

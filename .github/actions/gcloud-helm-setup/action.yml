@@ -15,10 +15,10 @@ inputs:
   service_account:
     description: Email address or unique identifier of the Google Cloud service account for which to generate credentials.
     required: true
-  sops_version:
-    description: The version of Mozilla SOPS to use when encrypting/decrypting, e.g 3.7.3.
+  vals_version:
+    description: The version of vals to use when encrypting/decrypting, e.g 0.18.0.
     required: false
-    default: 3.7.3
+    default: 0.18.0
   workload_identity_provider:
     description: The full identifier of the Workload Identity Provider, including the project number, pool name, and provider name.
     required: true
@@ -55,7 +55,7 @@ runs:
         helm plugin install https://github.com/jkroepke/helm-secrets
       shell: sh
 
-    - name: Install SOPS
-      uses: mdgreenwald/mozilla-sops-action@v1.2.0
+    - name: Install vals
+      uses: jkroepke/setup-vals@v1
       with:
-        version: ${{ inputs.sops_version }}
+        version: ${{ inputs.vals_version }}
