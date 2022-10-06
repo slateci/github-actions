@@ -47,7 +47,7 @@ jobs:
           path: .
 
       - name: Set Up Tools
-        uses: slateci/github-actions/.github/actions/gcloud-helm-setup@master
+        uses: slateci/github-actions/.github/actions/gcloud-helm-setup@feature/75-change-gcloud-helm-setupactionyml-to-use-variantdevvals-instead-of-sops
         with:
           cluster_name: ${{ secrets.gc_gke_cluster }}
           location: ${{ secrets.gc_compute_zone }}
