@@ -31,6 +31,9 @@ on:
         description: The Google Cloud Workload Identity Provider (WIP).
         required: true
 
+env:
+  HELM_SECRETS_BACKEND: vals
+
 jobs:
   upgrade:
     name: Run Helm Upgrade on GKE
@@ -72,7 +75,6 @@ jobs:
         working-directory: ${{ inputs.helm_working_directory }}
         run: |-
           helm secrets upgrade ${{ inputs.helm_release_prefix }}-${{ env.HELM_RELEASE_NAMESPACE_SHORTHAND }} . \
-          --set dockerImageTag=${{ env.RELEASE_VERSION }} \
           -f ./vars/${{ env.HELM_RELEASE_NAMESPACE_SHORTHAND }}/secrets.yml \
           -f ./vars/${{ env.HELM_RELEASE_NAMESPACE_SHORTHAND }}/values.yml \
           -f ./vars/secrets.yml \
