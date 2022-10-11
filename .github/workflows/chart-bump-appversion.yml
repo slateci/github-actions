@@ -13,6 +13,11 @@ on:
         description: The prefix used for the Helm release, e.g. 'slate-portal', 'slate-api'.
         required: true
         type: string
+      helm_working_directory:
+        description: The relative directory where Helm commands will execute.
+        required: false
+        default: "./resources/chart"
+        type: string
       python_packages:
         description: The pip packages to use.
         required: false
@@ -128,7 +133,7 @@ jobs:
           script: |
             import yaml
             
-            with open("./${{ inputs.helm_release_namespace }}/Chart.yaml") as stream:
+            with open("./${{ inputs.helm_release_namespace }}/${{ inputs.helm_working_directory }}/Chart.yaml") as stream:
               try:
                 data_loaded = yaml.safe_load(stream)
               except yaml.YAMLError as ex:
@@ -146,7 +151,7 @@ jobs:
             import semver
             import yaml
             
-            with open("./${{ inputs.helm_release_namespace }}/Chart.yaml") as stream:
+            with open("./${{ inputs.helm_release_namespace }}/${{ inputs.helm_working_directory }}/Chart.yaml") as stream:
               try:
                 data_loaded = yaml.safe_load(stream)
               except yaml.YAMLError as ex:
@@ -176,7 +181,7 @@ jobs:
 
       - name: Apply Release Version (Dev - behind)
         if: ${{ inputs.helm_release_namespace == 'development' && steps.compare-versions.outputs.ahead == 'false' }}
-        working-directory: ./${{ inputs.helm_release_namespace }}
+        working-directory: ./${{ inputs.helm_release_namespace }}/${{ inputs.helm_working_directory }}
         run: |-
           sed -i 's/^appVersion:.*$/appVersion: "${{ steps.bump-version.outputs.version }}"/g' Chart.yaml
           git add Chart.yaml
@@ -186,7 +191,7 @@ jobs:
       - id: release-version-staging
         name: Apply Release Version (Staging)
         if: ${{ inputs.helm_release_namespace == 'staging' }}
-        working-directory: ./development
+        working-directory: ./development/${{ inputs.helm_working_directory }}
         run: |-
           if [[ '${{ steps.compare-versions.outputs.ahead }}' == 'true' ]]
           then
@@ -204,7 +209,7 @@ jobs:
       - id: merge-staging
         name: Merge develop to master branch (Staging)
         if: ${{ inputs.helm_release_namespace == 'staging' }}
-        working-directory: ./${{ inputs.helm_release_namespace }}
+        working-directory: ./${{ inputs.helm_release_namespace }}/${{ inputs.helm_working_directory }}
         run: |-
           git fetch
           git merge origin/develop --commit -m '(github-action) Merge develop with master for: ${{ env.NEW_RELEASE_VERSION }}' --no-ff
@@ -215,7 +220,7 @@ jobs:
 
       - name: Tag Release Candidate (Staging)
         if: ${{ inputs.helm_release_namespace == 'staging' }}
-        working-directory: ./${{ inputs.helm_release_namespace }}
+        working-directory: ./${{ inputs.helm_release_namespace }}/${{ inputs.helm_working_directory }}
         run: |-
           git fetch
           git tag v${{ env.NEW_RELEASE_VERSION }} ${{ steps.merge-staging.outputs.hash }}
@@ -236,7 +241,7 @@ jobs:
             
             prerelease_datetime_suffix = os.environ.get('PRERELEASE_DATETIME_SUFFIX')
             
-            with open("./development/Chart.yaml") as stream:
+            with open("./development//${{ inputs.helm_working_directory }}/Chart.yaml") as stream:
               try:
                 data_loaded = yaml.safe_load(stream)
               except yaml.YAMLError as ex:
@@ -253,7 +258,7 @@ jobs:
 
       - name: Force-apply Release Version on develop branch (Staging)
         if: ${{ inputs.helm_release_namespace == 'staging' }}
-        working-directory: ./development
+        working-directory: ./development/${{ inputs.helm_working_directory }}
         run: |-
           sed -i 's/^appVersion:.*$/appVersion: "${{ steps.force-bump-version-staging.outputs.version }}"/g' Chart.yaml
           git add Chart.yaml
