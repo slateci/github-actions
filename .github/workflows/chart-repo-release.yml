@@ -29,9 +29,7 @@ jobs:
           path: .
 
       - name: Configure Git
-        run: |
-          git config user.name "${{ github.actor }}"
-          git config user.email "${{ github.actor }}@users.noreply.github.com"
+        uses: slateci/github-actions/.github/actions/configure-git@master
 
       - name: Install Helm
         uses: azure/setup-helm@v3.3

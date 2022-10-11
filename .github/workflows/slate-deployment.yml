@@ -88,10 +88,7 @@ jobs:
           path: ./checkout
 
       - name: Configure Git
-        working-directory: ./checkout
-        run: |
-          git config user.name "${{ github.actor }}"
-          git config user.email "${{ github.actor }}@users.noreply.github.com"
+        uses: slateci/github-actions/.github/actions/configure-git@master
 
       - name: Set up Python
         uses: actions/setup-python@v4

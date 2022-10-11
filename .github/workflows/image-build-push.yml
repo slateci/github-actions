@@ -64,9 +64,7 @@ jobs:
           repository: ${{ inputs.repository }}
 
       - name: Configure Git
-        run: |
-          git config --global user.name "${{ github.actor }}"
-          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+        uses: slateci/github-actions/.github/actions/configure-git@master
 
       - name: Build/push image to CR
         uses: docker/build-push-action@v3
