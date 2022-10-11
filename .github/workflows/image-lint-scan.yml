@@ -61,11 +61,12 @@ jobs:
           docker load --input ./image.tar
 
       - name: Lint with Dockle
-        uses: hands-lab/dockle-action@v1
+        uses: erzz/dockle-action@v1
         with:
           image: app-image:${{ github.sha }}
-          exit-code: '1'
-          exit-level: FATAL
+          exit-code: 1
+          failure-threshold: FATAL
+          timeout: "5m"
 
   scan:
     name: Trivy Scan
