@@ -1,5 +1,5 @@
 name: Set Up GCloud and Helm
-description: Authenticates with the Google Kubernetes Engine (GKE) and sets up Helm
+description: Authenticates with the Google Kubernetes Engine (GKE) and sets up Helm.
 
 inputs:
   cluster_name:
