@@ -10,7 +10,7 @@ on:
       helm_working_directory:
         description: The relative directory where Helm commands will execute.
         required: false
-        default: "."
+        default: "./resources/chart"
         type: string
 
     secrets:
