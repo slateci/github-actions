@@ -9,7 +9,6 @@ on:
   push:
     branches:
       - master
-      - feature/77-next-iteration-assorted-changes
 
 env:
   PYTHON_PACKAGES: |
