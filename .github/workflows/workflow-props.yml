@@ -10,7 +10,7 @@ on:
       helm_working_directory:
         description: The relative directory where Helm commands will execute.
         required: false
-        default: "."
+        default: "./resources/chart"
         type: string
       prod_git_ref:
         description: The git ref to use when deployment to production, e.g. '/refs/tags/v1.0.4'.
