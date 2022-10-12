@@ -9,8 +9,7 @@ on:
         type: string
       helm_working_directory:
         description: The relative directory where Helm commands will execute.
-        required: false
-        default: "."
+        required: true
         type: string
 
     secrets:
