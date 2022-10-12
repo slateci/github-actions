@@ -40,6 +40,7 @@ jobs:
           name: shared-workflow-props
 
       - name: Apply Shared Workflow Properties
+        working-directory: .
         run: |-
           source workflow.properties
           echo "GIT_REF=${gitRef}" >> $GITHUB_ENV
