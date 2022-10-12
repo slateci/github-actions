@@ -17,7 +17,8 @@ on:
         type: string
       repository:
         description: The GitHub repository to clone, e.g. 'slateci/slate-client-server'.
-        required: true
+        required: false
+        default: ${{ github.repository }}
         type: string
 
     secrets:
