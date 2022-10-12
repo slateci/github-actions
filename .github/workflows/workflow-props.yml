@@ -16,6 +16,12 @@ on:
         description: The git ref to use when deployment to production, e.g. '/refs/tags/v1.0.4'.
         required: false
         type: string
+      python_packages:
+        description: The pip packages to use.
+        required: false
+        default: |
+          pyyaml==6.0
+        type: string
       python_version:
         description: The version of Python to use, e.g. 3.9.
         required: false
@@ -61,8 +67,7 @@ jobs:
       - name: Install Python packages
         uses: BSFishy/pip-action@v1
         with:
-          packages: |
-            pyyaml==6.0
+          packages: ${{ inputs.python_packages }}
 
       - name: Find Release Version
         uses: jannekem/run-python-script-action@v1
