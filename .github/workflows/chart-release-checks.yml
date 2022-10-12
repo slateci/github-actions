@@ -101,7 +101,7 @@ jobs:
               raise Exception(message)
 
       - id: compare-versions
-        name: Compare Deployed & Source Release Versions
+        name: Compare Deployed & Source Release Versions (Dev/Staging)
         if: ${{ inputs.helm_release_namespace != 'production' }}
         env:
           HELM_RELEASE_NAMESPACE: ${{ inputs.helm_release_namespace }}
@@ -110,7 +110,7 @@ jobs:
           curl -fsSL ${{ env.SLATE_GITHUB_ACTIONS_RAWCONTENT_URL }}/${{ env.SLATE_GITHUB_ACTIONS_BRANCHORTAG }}/scripts/semver-compare.py -o semver-compare.py
           python semver-compare.py
 
-      - name: "Release Version: Not Ahead"
+      - name: "Release Version: Not Ahead (Dev/Staging)"
         if:  ${{ inputs.helm_release_namespace != 'production' && steps.compare-versions.outputs.ahead == 'false' }}
         uses: jannekem/run-python-script-action@v1
         with:
