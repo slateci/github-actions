@@ -11,6 +11,10 @@ on:
       - master
 
 env:
+  PYTHON_PACKAGES: |
+    jsonschema==4.9.1
+    ruamel.yaml==0.17.21
+    requests==2.27.1
   PYTHON_VERSION: 3.9
   SLATE_GITHUB_ACTIONS_BRANCHORTAG: master
   SLATE_GITHUB_ACTIONS_RAWCONTENT_URL: https://raw.githubusercontent.com/slateci/github-actions
@@ -35,10 +39,7 @@ jobs:
       - name: Install Python packages
         uses: BSFishy/pip-action@v1
         with:
-          packages: |
-            jsonschema==4.9.1
-            ruamel.yaml==0.17.21
-            requests==2.27.1
+          packages: ${{ env.PYTHON_PACKAGES }}
 
       - name: Download workflow dependencies
         run: |-

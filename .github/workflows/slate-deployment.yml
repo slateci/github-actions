@@ -29,6 +29,13 @@ on:
         required: false
         default: "https://api.slateci.io"
         type: string
+      python_packages:
+        description: The pip packages to use.
+        required: false
+        default: |
+          jinja2==3.1.2
+          requests==2.27.1
+        type: string
       python_version:
         description: The version of Python to use, e.g. 3.9.
         required: false
@@ -44,7 +51,7 @@ on:
         required: true
 
 env:
-  SLATE_GITHUB_ACTIONS_BRANCHORTAG: v6
+  SLATE_GITHUB_ACTIONS_BRANCHORTAG: v8
   SLATE_GITHUB_ACTIONS_RAWCONTENT_URL: https://raw.githubusercontent.com/slateci/github-actions
 
 jobs:
@@ -88,10 +95,7 @@ jobs:
           path: ./checkout
 
       - name: Configure Git
-        working-directory: ./checkout
-        run: |
-          git config user.name "${{ github.actor }}"
-          git config user.email "${{ github.actor }}@users.noreply.github.com"
+        uses: slateci/github-actions/.github/actions/configure-git@v8
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -101,9 +105,7 @@ jobs:
       - name: Install Python packages
         uses: BSFishy/pip-action@v1
         with:
-          packages: |
-            jinja2==3.1.2
-            requests==2.27.1
+          packages: ${{ inputs.python_packages }}
 
       - name: Download workflow dependencies
         run: |-

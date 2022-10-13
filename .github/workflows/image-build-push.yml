@@ -17,7 +17,8 @@ on:
         type: string
       repository:
         description: The GitHub repository to clone, e.g. 'slateci/slate-client-server'.
-        required: true
+        required: false
+        default: ${{ github.repository }}
         type: string
 
     secrets:
@@ -40,6 +41,7 @@ jobs:
           name: shared-workflow-props
 
       - name: Apply Shared Workflow Properties
+        working-directory: .
         run: |-
           source workflow.properties
           echo "GIT_REF=${gitRef}" >> $GITHUB_ENV
@@ -64,9 +66,7 @@ jobs:
           repository: ${{ inputs.repository }}
 
       - name: Configure Git
-        run: |
-          git config --global user.name "${{ github.actor }}"
-          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+        uses: slateci/github-actions/.github/actions/configure-git@v8
 
       - name: Build/push image to CR
         uses: docker/build-push-action@v3

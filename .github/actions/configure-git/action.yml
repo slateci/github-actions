@@ -1,0 +1,16 @@
+name: Configure Git
+description: Globally configure git
+
+runs:
+  using: composite
+
+  steps:
+    - name: Set global Git user name
+      working-directory: .
+      run: git config --global user.name "${{ github.actor }}"
+      shell: bash
+
+    - name: Set global Git user email
+      working-directory: .
+      run: git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+      shell: bash

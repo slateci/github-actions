@@ -14,7 +14,7 @@ on:
       helm_working_directory:
         description: The relative directory where Helm commands will execute.
         required: false
-        default: "."
+        default: "./resources/chart"
         type: string
 
     secrets:
@@ -50,6 +50,7 @@ jobs:
           name: shared-workflow-props
 
       - name: Apply Shared Workflow Properties
+        working-directory: .
         run: |-
           source workflow.properties
           echo "GIT_REF=${gitRef}" >> $GITHUB_ENV
