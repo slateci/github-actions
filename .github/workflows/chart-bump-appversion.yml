@@ -230,7 +230,7 @@ jobs:
         working-directory: ./${{ inputs.helm_release_namespace }}
         run: |-
           git fetch
-          git merge origin/develop --commit -m '(github-action) Merge develop with master for: ${{ env.NEW_RELEASE_VERSION }}' --no-ff
+          git merge origin/develop --commit -m '(github-action) Merge develop with master for: ${{ env.RELEASE_VERSION }}' --no-ff
           git push
           
           COMMIT_HASH=$(git log -1 --format="%H")
@@ -241,8 +241,8 @@ jobs:
         working-directory: ./${{ inputs.helm_release_namespace }}
         run: |-
           git fetch
-          git tag v${{ env.NEW_RELEASE_VERSION }} ${{ steps.merge-staging.outputs.hash }}
-          git push origin v${{ env.NEW_RELEASE_VERSION }}
+          git tag v${{ env.RELEASE_VERSION }} ${{ steps.merge-staging.outputs.hash }}
+          git push origin v${{ env.RELEASE_VERSION }}
 
 # TODO: Only do the following if dev is behind staging...
 
