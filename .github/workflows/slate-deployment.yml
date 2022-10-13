@@ -95,7 +95,7 @@ jobs:
           path: ./checkout
 
       - name: Configure Git
-        uses: slateci/github-actions/.github/actions/configure-git@master
+        uses: slateci/github-actions/.github/actions/configure-git@feature/77-next-iteration-assorted-changes
 
       - name: Set up Python
         uses: actions/setup-python@v4
