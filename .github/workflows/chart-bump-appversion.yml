@@ -184,16 +184,16 @@ jobs:
         if: ${{ inputs.helm_release_namespace == 'development' && steps.compare-versions.outputs.ahead == 'false' }}
         working-directory: ./${{ inputs.helm_release_namespace }}/${{ inputs.helm_working_directory }}
         run: |-
-          echo "RELEASE_VERSION=${{ steps.bump-version.outputs.version }}" >> $GITHUB_ENV
-          
           git fetch
-          sed -i 's/^appVersion:.*$/appVersion: "${{ env.RELEASE_VERSION }}"/g' Chart.yaml
+          sed -i 's/^appVersion:.*$/appVersion: "${{ steps.bump-version.outputs.version }}"/g' Chart.yaml
           git add Chart.yaml
-          git commit -m '(github-action) Increment appVersion: ${{ env.RELEASE_VERSION }}'
+          git commit -m '(github-action) Increment appVersion: ${{ steps.bump-version.outputs.version }}'
           git push
           
           COMMIT_HASH=$(git log -1 --format="%H")
           echo "::set-output name=hash::$COMMIT_HASH"
+          
+          echo "RELEASE_VERSION=${{ steps.bump-version.outputs.version }}" >> $GITHUB_ENV
 
       - name: Tag Pre-Release (Dev)
         if: ${{ inputs.helm_release_namespace == 'development' }}
@@ -210,19 +210,25 @@ jobs:
           git tag v${{ env.RELEASE_VERSION }} $COMMIT_HASH
           git push origin v${{ env.RELEASE_VERSION }}
 
-      - name: Apply Release Version (Staging)
-        if: ${{ inputs.helm_release_namespace == 'staging' }}
+      - name: Apply Release Version (Staging - ahead)
+        if: ${{ inputs.helm_release_namespace == 'staging' && steps.compare-versions.outputs.ahead = 'true' }}
         working-directory: ./development/${{ inputs.helm_working_directory }}
         run: |-
-          if [[ '${{ steps.compare-versions.outputs.ahead }}' == 'false' ]]
-          then
-            echo "RELEASE_VERSION=${{ steps.bump-version.outputs.version }}" >> $GITHUB_ENV
-          fi
-          
           sed -i "s/^appVersion:.*$/appVersion: '${{ env.RELEASE_VERSION }}'/g" Chart.yaml
           git add Chart.yaml
           git commit -m "(github-action) Increment appVersion: ${{ env.RELEASE_VERSION }}"
           git push
+
+      - name: Apply Release Version (Staging - behind)
+        if: ${{ inputs.helm_release_namespace == 'staging' && steps.compare-versions.outputs.ahead = 'false' }}
+        working-directory: ./development/${{ inputs.helm_working_directory }}
+        run: |-
+          sed -i "s/^appVersion:.*$/appVersion: '${{ steps.bump-version.outputs.version }}'/g" Chart.yaml
+          git add Chart.yaml
+          git commit -m "(github-action) Increment appVersion: ${{ steps.bump-version.outputs.version }}"
+          git push
+          
+          echo "RELEASE_VERSION=${{ steps.bump-version.outputs.version }}" >> $GITHUB_ENV
 
       - id: merge-staging
         name: Merge develop to master branch (Staging)
