@@ -48,7 +48,7 @@ on:
 env:
   HELM_SECRETS_BACKEND: vals
   PRERELEASE_DATETIME_SUFFIX: "%Y%m%d-%H%M%S"
-  SLATE_GITHUB_ACTIONS_BRANCHORTAG: v6
+  SLATE_GITHUB_ACTIONS_BRANCHORTAG: v8
   SLATE_GITHUB_ACTIONS_RAWCONTENT_URL: https://raw.githubusercontent.com/slateci/github-actions
 
 jobs:
@@ -98,7 +98,7 @@ jobs:
           ref: refs/heads/develop
 
       - name: Configure Git
-        uses: slateci/github-actions/.github/actions/configure-git@feature/77-next-iteration-assorted-changes
+        uses: slateci/github-actions/.github/actions/configure-git@v8
 
       - name: Set Up Tools
         uses: slateci/github-actions/.github/actions/gcloud-helm-setup@master
