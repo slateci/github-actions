@@ -141,6 +141,17 @@ jobs:
       contents: write
 
     steps:
+      - name: Download Shared Workflow Properties
+        uses: actions/download-artifact@v3
+        with:
+          name: shared-workflow-props
+
+      - name: Apply Shared Workflow Properties
+        working-directory: .
+        run: |-
+          source workflow.properties
+          echo "RELEASE_VERSION=${releaseVersion}" >> $GITHUB_ENV
+
       - name: Download Linux Binary
         uses: actions/download-artifact@v3
         with:
@@ -157,5 +168,5 @@ jobs:
           artifacts: "*.tar.gz,*.sha256"
           body: ${{ inputs.github_release_body }}
           name: Release ${{ env.RELEASE_VERSION }}
-          tag: ${{ env.RELEASE_VERSION }}
+          tag: refs/tags/v${{ env.RELEASE_VERSION }}
           prerelease: ${{ contains(env.RELEASE_VERSION, 'pre') }}
