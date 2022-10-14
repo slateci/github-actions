@@ -45,7 +45,7 @@ jobs:
       - name: Run make
         working-directory: ./checkout/build
         run: |-
-          export VERSION_OVERRIDE=$(echo ${{ github.ref }} | cut -d'v' -f 2)
+          export VERSION_OVERRIDE=${{ env.RELEASE_VERSION }}
           make
 
       - name: Strip symbols from binary
