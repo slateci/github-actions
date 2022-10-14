@@ -5,10 +5,11 @@ concurrency:
 on:
   workflow_call:
     inputs:
-      python_version:
-        description: The version of Python to use, e.g. 3.9.
+      github_release_body:
+        description: The body for the GitHub Release.
         required: false
-        default: 3.9
+        default: |-
+          See https://slateci.io/docs/tools/ for installation and usage instructions.
         type: string
 
 jobs:
@@ -150,13 +151,11 @@ jobs:
         with:
           name: slate-macos-artifacts
 
-      - name: Create Release
+      - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
           artifacts: "*.tar.gz,*.sha256"
-          body: |-
-            See https://slateci.io/docs/tools/ for installation and usage instructions.
+          body: ${{ inputs.github_release_body }}
           name: Release ${{ github.ref_name }}
           tag: ${{ github.ref }}
           prerelease: ${{ contains(github.ref, 'pre') }}
-          token: ${{ secrets.GITHUB_TOKEN }}
