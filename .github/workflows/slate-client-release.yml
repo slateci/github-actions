@@ -156,6 +156,6 @@ jobs:
         with:
           artifacts: "*.tar.gz,*.sha256"
           body: ${{ inputs.github_release_body }}
-          name: Release ${{ github.ref_name }}
-          tag: ${{ github.ref }}
-          prerelease: ${{ contains(github.ref, 'pre') }}
+          name: Release ${{ env.RELEASE_VERSION }}
+          tag: ${{ env.RELEASE_VERSION }}
+          prerelease: ${{ contains(env.RELEASE_VERSION, 'pre') }}
