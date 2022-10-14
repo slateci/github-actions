@@ -38,28 +38,28 @@ jobs:
           ref: refs/tags/v${{ env.RELEASE_VERSION }}
 
       - name: Run CMake
-        working-directory: build
+        working-directory: ./checkout/build
         run: |-
           cmake .. -DBUILD_CLIENT=True -DBUILD_SERVER=False -DBUILD_SERVER_TESTS=False -DSTATIC_CLIENT=True
 
       - name: Run make
-        working-directory: build
+        working-directory: ./checkout/build
         run: |-
           export VERSION_OVERRIDE=$(echo ${{ github.ref }} | cut -d'v' -f 2)
           make
 
       - name: Strip symbols from binary
-        working-directory: build
+        working-directory: ./checkout/build
         run: |-
           strip slate
 
       - name: Create tarball
-        working-directory: build
+        working-directory: ./checkout/build
         run: |-
           tar -czvf slate-linux.tar.gz slate
 
       - name: Generate hash of tarball
-        working-directory: build
+        working-directory: ./checkout/build
         run: |-
           sha256sum slate-linux.tar.gz > slate-linux.sha256
 
@@ -68,8 +68,8 @@ jobs:
         with:
           name: slate-linux-artifacts
           path: |-
-            build/slate-linux.tar.gz
-            build/slate-linux.sha256
+            ./checkout/build/slate-linux.tar.gz
+            ./checkout/build/slate-linux.sha256
           retention-days: 1
 
   build-macos:
@@ -96,28 +96,28 @@ jobs:
           ref: refs/tags/v${{ env.RELEASE_VERSION }}
 
       - name: Run CMake
-        working-directory: build
+        working-directory: ./checkout/build
         run: |-
           cmake .. -DBUILD_CLIENT=True -DBUILD_SERVER=False -DBUILD_SERVER_TESTS=False -DSTATIC_CLIENT=True
 
       - name: Run make
-        working-directory: build
+        working-directory: ./checkout/build
         run: |-
           export VERSION_OVERRIDE=$(echo ${{ github.ref }} | cut -d'v' -f 2)
           make
 
       - name: Strip symbols from binary
-        working-directory: build
+        working-directory: ./checkout/build
         run: |-
           strip slate
 
       - name: Create tarball
-        working-directory: build
+        working-directory: ./checkout/build
         run: |-
           tar -czvf slate-macos.tar.gz slate
 
       - name: Generate hash of tarball
-        working-directory: build
+        working-directory: ./checkout/build
         run: |-
           shasum -b -a 256 slate-macos.tar.gz > slate-macos.sha256
 
@@ -126,8 +126,8 @@ jobs:
         with:
           name: slate-macos-artifacts
           path: |
-            build/slate-macos.tar.gz
-            build/slate-macos.sha256
+            ./checkout/build/slate-macos.tar.gz
+            ./checkout/build/slate-macos.sha256
           retention-days: 1
 
   deploy-github:
