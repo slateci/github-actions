@@ -73,8 +73,19 @@ jobs:
           retention-days: 1
 
   build-macos:
-    name: Build MacOS Client
-    runs-on: macos-12
+    name: Build MacOS Clients
+    runs-on: ${{ matrix.os }}-${{ matrix.version }}
+    strategy:
+      fail-fast: true
+      matrix:
+        os:
+          - macos
+        version:
+          - 11
+          - 12
+
+    env:
+      FILE_NAME: slate-${{ matrix.os }}-${{ matrix.version }}
 
     steps:
       - name: Download Shared Workflow Properties
@@ -114,20 +125,20 @@ jobs:
       - name: Create tarball
         working-directory: ./checkout/build
         run: |-
-          tar -czvf slate-macos.tar.gz slate
+          tar -czvf ${{ env.FILE_NAME }}.tar.gz slate
 
       - name: Generate hash of tarball
         working-directory: ./checkout/build
         run: |-
-          shasum -b -a 256 slate-macos.tar.gz > slate-macos.sha256
+          shasum -b -a 256 ${{ env.FILE_NAME }}.tar.gz > ${{ env.FILE_NAME }}.sha256
 
       - name: Persist built binary and hash
         uses: actions/upload-artifact@v3
         with:
-          name: slate-macos-artifacts
+          name: ${{ env.FILE_NAME }}-artifacts
           path: |
-            ./checkout/build/slate-macos.tar.gz
-            ./checkout/build/slate-macos.sha256
+            ./checkout/build/${{ env.FILE_NAME }}.tar.gz
+            ./checkout/build/${{ env.FILE_NAME }}.sha256
           retention-days: 1
 
   deploy-github:
@@ -157,10 +168,15 @@ jobs:
         with:
           name: slate-linux-artifacts
 
-      - name: Download MacOS Binary
+      - name: Download MacOS 11 Binary
         uses: actions/download-artifact@v3
         with:
-          name: slate-macos-artifacts
+          name: slate-macos-11-artifacts
+
+      - name: Download MacOS 12 Binary
+        uses: actions/download-artifact@v3
+        with:
+          name: slate-macos-12-artifacts
 
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
