@@ -31,7 +31,7 @@ jobs:
         api_endpoint:
           - https://api.dev.slateci.io
           - https://api.staging.slateci.io
-#          - https://api.slateci.io
+          - https://api.slateci.io
 
     steps:
       - name: Set up Python
