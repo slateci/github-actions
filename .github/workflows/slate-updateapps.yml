@@ -18,8 +18,14 @@ on:
         type: string
 
     secrets:
-      slate_api_token:
-        description: The SLATE API token used to communicate with the SLATE API endpoints.
+      slate_api_token_dev:
+        description: The SLATE API token used to communicate with the development SLATE API endpoint.
+        required: true
+      slate_api_token_staging:
+        description: The SLATE API token used to communicate with the staging SLATE API endpoint.
+        required: true
+      slate_api_token_prod:
+        description: The SLATE API token used to communicate with the production SLATE API endpoint.
         required: true
 
 jobs:
@@ -28,10 +34,13 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        api_endpoint:
-          - https://api.dev.slateci.io
-          - https://api.staging.slateci.io
-          - https://api.slateci.io
+        include:
+          - api_endpoint: https://api.dev.slateci.io
+            api_token: ${{ secrets.slate_api_token_dev }}
+          - api_endpoint: https://api.staging.slateci.io
+            api_token: ${{ secrets.slate_api_token_staging }}
+          - api_endpoint: https://api.slateci.io
+            api_token: ${{ secrets.slate_api_token_prod }}
 
     steps:
       - name: Set up Python
@@ -51,7 +60,7 @@ jobs:
             import requests
             
             slateAPIEndPoint = "${{ matrix.api_endpoint }}"
-            slateAPIToken = "${{ secrets.slate_api_token }}"
+            slateAPIToken = "${{ matrix.slate_api_token }}"
             
             uri = f"{slateAPIEndPoint}/v1alpha3/update_apps"
             response = requests.post(
