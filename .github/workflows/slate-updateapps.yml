@@ -16,22 +16,20 @@ on:
         required: false
         default: 3.9
         type: string
+      slate_api_endpoint:
+        description: The SLATE API endpoint.
+        required: true
+        type: string
 
     secrets:
       slate_api_token:
-        description: The SLATE API token used to communicate with the SLATE API endpoints.
+        description: The SLATE API token used to communicate with the SLATE API endpoint.
         required: true
 
 jobs:
   notify:
-    name: Notify API Servers
+    name: Notify API Server
     runs-on: ubuntu-20.04
-    strategy:
-      matrix:
-        api_endpoint:
-          - https://api.dev.slateci.io
-          - https://api.staging.slateci.io
-          - https://api.slateci.io
 
     steps:
       - name: Set up Python
@@ -50,7 +48,7 @@ jobs:
           script: |
             import requests
             
-            slateAPIEndPoint = "${{ matrix.api_endpoint }}"
+            slateAPIEndPoint = "${{ inputs.slate_api_endpoint }}"
             slateAPIToken = "${{ secrets.slate_api_token }}"
             
             uri = f"{slateAPIEndPoint}/v1alpha3/update_apps"
