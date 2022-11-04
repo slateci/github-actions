@@ -98,3 +98,4 @@ jobs:
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
           timeout: "10m"
+        continue-on-error: true
