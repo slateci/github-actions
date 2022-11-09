@@ -28,6 +28,7 @@ on:
         required: true
 
 env:
+  HELM_DIFF_COLOR: true
   HELM_SECRETS_BACKEND: vals
 
 jobs:
