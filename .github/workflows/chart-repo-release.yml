@@ -32,7 +32,7 @@ jobs:
         uses: slateci/github-actions/.github/actions/configure-git@v8
 
       - name: Install Helm
-        uses: azure/setup-helm@v3.3
+        uses: azure/setup-helm@v3.4
         with:
           version: ${{ inputs.helm_version }}
 
