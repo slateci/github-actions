@@ -1,6 +1,4 @@
 name: SLATE Update Apps
-concurrency:
-  group: sua-${{ github.repository }}-${{ github.ref_name }}
 
 on:
   workflow_call:
