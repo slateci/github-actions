@@ -99,3 +99,17 @@ jobs:
           severity: 'CRITICAL,HIGH'
           timeout: "10m"
         continue-on-error: true
+
+  cleanup:
+    name: Clean Up
+    runs-on: ubuntu-20.04
+    needs:
+      - lint
+      - scan
+
+    steps:
+      - name: Delete artifacts
+        uses: geekyeggo/delete-artifact@v2
+        with:
+          name: image
+          failOnError: false
