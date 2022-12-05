@@ -5,6 +5,11 @@ concurrency:
 on:
   workflow_call:
     inputs:
+      deploy_client:
+        description: Whether to deploy the client to GitHub
+        required: false
+        default: true
+        type: boolean
       github_release_body:
         description: The body for the GitHub Release.
         required: false
@@ -144,6 +149,7 @@ jobs:
   deploy-github:
     name: Deploy to GitHub
     runs-on: ubuntu-20.04
+    if: ${{ inputs.deploy_client }}
     needs:
       - build-linux
       - build-macos
