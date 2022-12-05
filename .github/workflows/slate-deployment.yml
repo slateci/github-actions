@@ -95,7 +95,7 @@ jobs:
           path: ./checkout
 
       - name: Configure Git
-        uses: slateci/github-actions/.github/actions/configure-git@v8
+        uses: slateci/github-actions/.github/actions/configure-git@v10
 
       - name: Set up Python
         uses: actions/setup-python@v4
