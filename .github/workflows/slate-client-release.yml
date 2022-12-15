@@ -21,7 +21,7 @@ jobs:
   build-linux:
     name: Build Linux Client
     runs-on: ubuntu-20.04
-    container: hub.opensciencegrid.org/slate/slate-client-alpine:1.1.0
+    container: hub.opensciencegrid.org/slate/slate-client-alpine:1.2.0
 
     steps:
       - name: Download Shared Workflow Properties
