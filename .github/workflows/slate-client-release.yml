@@ -22,6 +22,8 @@ jobs:
     name: Build Linux Client
     runs-on: ubuntu-20.04
     container: hub.opensciencegrid.org/slate/slate-client-alpine:1.2.0
+    env:
+      CCACHE_NAME: "cpp-client-build-linux"
 
     steps:
       - name: Download Shared Workflow Properties
@@ -42,18 +44,29 @@ jobs:
           path: ./checkout
           ref: refs/tags/v${{ env.RELEASE_VERSION }}
 
-      - name: Run CMake
-        working-directory: ./checkout/build
-        run: |-
-          cmake .. -DBUILD_CLIENT=True -DBUILD_SERVER=False -DBUILD_SERVER_TESTS=False -DSTATIC_CLIENT=True
+      - name: Set up ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ${{ runner.os }}-${{ env.CCACHE_NAME }}-${{ github.ref }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.CCACHE_NAME }}-${{ github.ref }}
+            ${{ runner.os }}-${{ env.CCACHE_NAME }}-
 
-      - name: Run make
+      - name: Build SLATE client
         working-directory: ./checkout/build
+        env:
+          VERSION_OVERRIDE: ${{ env.RELEASE_VERSION }}
         run: |-
-          export VERSION_OVERRIDE=${{ env.RELEASE_VERSION }}
-          make
+          cmake .. \
+            -D CMAKE_C_COMPILER_LAUNCHER=ccache \
+            -D CMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            -DBUILD_CLIENT=True \
+            -DBUILD_SERVER=False \
+            -DBUILD_SERVER_TESTS=False \
+            -DSTATIC_CLIENT=True
+          make -j2 -k
 
-      - name: Strip symbols from binary
+      - name: Strip symbols from SLATE client binary
         working-directory: ./checkout/build
         run: |-
           strip slate
@@ -90,7 +103,8 @@ jobs:
           - 12
 
     env:
-      FILE_NAME: slate-${{ matrix.os }}-${{ matrix.version }}
+      CCACHE_NAME: "cpp-client-build-${{ matrix.os }}-${{ matrix.version }}"
+      FILE_NAME: "slate-${{ matrix.os }}-${{ matrix.version }}"
 
     steps:
       - name: Download Shared Workflow Properties
@@ -111,18 +125,29 @@ jobs:
           path: ./checkout
           ref: refs/tags/v${{ env.RELEASE_VERSION }}
 
-      - name: Run CMake
-        working-directory: ./checkout/build
-        run: |-
-          cmake .. -DBUILD_CLIENT=True -DBUILD_SERVER=False -DBUILD_SERVER_TESTS=False -DSTATIC_CLIENT=True
+      - name: Set up ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ${{ runner.os }}-${{ env.CCACHE_NAME }}-${{ github.ref }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.CCACHE_NAME }}-${{ github.ref }}
+            ${{ runner.os }}-${{ env.CCACHE_NAME }}-
 
-      - name: Run make
+      - name: Build SLATE client
         working-directory: ./checkout/build
+        env:
+          VERSION_OVERRIDE: ${{ env.RELEASE_VERSION }}
         run: |-
-          export VERSION_OVERRIDE=$(echo ${{ github.ref }} | cut -d'v' -f 2)
-          make
+          cmake .. \
+            -D CMAKE_C_COMPILER_LAUNCHER=ccache \
+            -D CMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            -DBUILD_CLIENT=True \
+            -DBUILD_SERVER=False \
+            -DBUILD_SERVER_TESTS=False \
+            -DSTATIC_CLIENT=True
+          make -j2 -k
 
-      - name: Strip symbols from binary
+      - name: Strip symbols from SLATE client binary
         working-directory: ./checkout/build
         run: |-
           strip slate
