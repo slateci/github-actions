@@ -63,22 +63,22 @@ jobs:
           push: false
           tags: app-image:${{ github.sha }}
 
-#      - name: Lint with Dockle
-#        uses: erzz/dockle-action@v1
-#        with:
-#          image: app-image:${{ github.sha }}
-#          exit-code: 1
-#          failure-threshold: FATAL
-#          timeout: "10m"
-#
-#      - name: Scan with Trivy
-#        uses: aquasecurity/trivy-action@master
-#        with:
-#          image-ref: app-image:${{ github.sha }}
-#          format: 'table'
-#          exit-code: '0'
-#          ignore-unfixed: true
-#          vuln-type: 'os,library'
-#          severity: 'CRITICAL,HIGH'
-#          timeout: "10m"
-#        continue-on-error: true
+      - name: Lint with Dockle
+        uses: erzz/dockle-action@v1
+        with:
+          image: app-image:${{ github.sha }}
+          exit-code: 1
+          failure-threshold: FATAL
+          timeout: "10m"
+
+      - name: Scan with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: app-image:${{ github.sha }}
+          format: 'table'
+          exit-code: '0'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+          timeout: "10m"
+        continue-on-error: true
