@@ -65,6 +65,15 @@ jobs:
           ref: ${{ env.GIT_REF }}
           repository: ${{ inputs.repository }}
 
+      - name: Cache Buildx caches
+        uses: actions/cache@v3
+        with:
+          path: /var/lib/docker/buildkit
+          key: ${{ runner.os }}-buildx-${{ inputs.cr_repository }}-${{ github.ref }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-${{ github.ref }}
+            ${{ runner.os }}-buildx-
+
       - name: Configure Git
         uses: slateci/github-actions/.github/actions/configure-git@v11
 

@@ -23,6 +23,15 @@ jobs:
           fetch-depth: 0
           path: .
 
+      - name: Cache Buildx caches
+        uses: actions/cache@v3
+        with:
+          path: /var/lib/docker/buildkit
+          key: ${{ runner.os }}-buildx-app-image-${{ github.ref }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-${{ github.ref }}
+            ${{ runner.os }}-buildx-
+
       - name: Build Docker image
         uses: docker/build-push-action@v3
         with:
