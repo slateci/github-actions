@@ -16,6 +16,9 @@ jobs:
     steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
+        with:
+          install: true
+          driver-opts: image=moby/buildkit:buildx-stable-1
 
       - name: Check out repo
         uses: actions/checkout@v3
@@ -23,41 +26,50 @@ jobs:
           fetch-depth: 0
           path: .
 
-      - name: Cache Buildx caches
+      - name: Enable Buildkit caches
         uses: actions/cache@v3
         with:
-          path: /var/lib/docker/buildkit
+          path: /tmp/buildkit-cache/buildkit-state.tar
           key: ${{ runner.os }}-buildx-${{ github.ref }}
           restore-keys: |
             ${{ runner.os }}-buildx-${{ github.ref }}
             ${{ runner.os }}-buildx-
+
+      - name: Load buildkit state from cache
+        uses: dashevo/gh-action-cache-buildkit-state@v1
+        with:
+          builder: buildx_buildkit_${{ steps.buildx.outputs.name }}0
+          cache-path: /tmp/buildkit-cache
+          cache-max-size: 2g
 
       - name: Build Docker image
         uses: docker/build-push-action@v3
         with:
           context: .
           file: ${{ inputs.file }}
+          build-args: |
+            ccachedir=/tmp/ccache
           load: true
           target: release-stage
           push: false
           tags: app-image:${{ github.sha }}
 
-      - name: Lint with Dockle
-        uses: erzz/dockle-action@v1
-        with:
-          image: app-image:${{ github.sha }}
-          exit-code: 1
-          failure-threshold: FATAL
-          timeout: "10m"
-
-      - name: Scan with Trivy
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: app-image:${{ github.sha }}
-          format: 'table'
-          exit-code: '0'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
-          timeout: "10m"
-        continue-on-error: true
+#      - name: Lint with Dockle
+#        uses: erzz/dockle-action@v1
+#        with:
+#          image: app-image:${{ github.sha }}
+#          exit-code: 1
+#          failure-threshold: FATAL
+#          timeout: "10m"
+#
+#      - name: Scan with Trivy
+#        uses: aquasecurity/trivy-action@master
+#        with:
+#          image-ref: app-image:${{ github.sha }}
+#          format: 'table'
+#          exit-code: '0'
+#          ignore-unfixed: true
+#          vuln-type: 'os,library'
+#          severity: 'CRITICAL,HIGH'
+#          timeout: "10m"
+#        continue-on-error: true
