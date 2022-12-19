@@ -20,7 +20,7 @@ jobs:
       - name: Check out repo
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          fetch-depth: 1
           path: .
 
       - name: Enable Buildx Cache
@@ -28,7 +28,7 @@ jobs:
         with:
           cache_dir: ${{ env.BUILDKIT_CACHE_DIR }}
 
-      - name: Build Docker image
+      - name: Build image
         uses: docker/build-push-action@v3
         with:
           context: .
