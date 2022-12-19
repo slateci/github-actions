@@ -13,17 +13,22 @@ jobs:
     name: Check Image
     runs-on: ubuntu-20.04
 
-    steps:
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+    env:
+      BUILDKIT_CACHE_DIR: /tmp/buildkit-cache
 
+    steps:
       - name: Check out repo
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          fetch-depth: 1
           path: .
 
-      - name: Build Docker image
+      - name: Enable Buildx Cache
+        uses: slateci/github-actions/.github/actions/buildkit-enable-cache@v12
+        with:
+          cache_dir: ${{ env.BUILDKIT_CACHE_DIR }}
+
+      - name: Build image
         uses: docker/build-push-action@v3
         with:
           context: .

@@ -34,6 +34,9 @@ jobs:
     name: Build/push image
     runs-on: ubuntu-20.04
 
+    env:
+      BUILDKIT_CACHE_DIR: /tmp/buildkit-cache
+
     steps:
       - name: Download Shared Workflow Properties
         uses: actions/download-artifact@v3
@@ -47,8 +50,13 @@ jobs:
           echo "GIT_REF=${gitRef}" >> $GITHUB_ENV
           echo "RELEASE_VERSION=${releaseVersion}" >> $GITHUB_ENV
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+      - name: Check out repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          path: .
+          ref: ${{ env.GIT_REF }}
+          repository: ${{ inputs.repository }}
 
       - name: Authenticate with CR
         uses: docker/login-action@v2
@@ -57,16 +65,13 @@ jobs:
           username: "${{ secrets.cr_username }}"
           password: "${{ secrets.cr_password }}"
 
-      - name: Check out repo
-        uses: actions/checkout@v3
+      - name: Enable Buildx Cache
+        uses: slateci/github-actions/.github/actions/buildkit-enable-cache@v12
         with:
-          fetch-depth: 0
-          path: .
-          ref: ${{ env.GIT_REF }}
-          repository: ${{ inputs.repository }}
+          cache_dir: ${{ env.BUILDKIT_CACHE_DIR }}
 
       - name: Configure Git
-        uses: slateci/github-actions/.github/actions/configure-git@v11
+        uses: slateci/github-actions/.github/actions/configure-git@v12
 
       - name: Build/push image to CR
         uses: docker/build-push-action@v3
