@@ -13,6 +13,9 @@ jobs:
     name: Check Image
     runs-on: ubuntu-20.04
 
+    env:
+      BUILDKIT_CACHE_DIR: /tmp/buildkit-cache
+
     steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -26,20 +29,25 @@ jobs:
           fetch-depth: 0
           path: .
 
+      - name: Make Buildkit cache path
+        run: |
+          mkdir ${{ env.BUILDKIT_CACHE_DIR }}
+        shell: sh
+
       - name: Enable Buildkit caches
         uses: actions/cache@v3
         with:
-          path: /tmp/buildkit-cache/buildkit-state.tar
+          path: ${{ env.BUILDKIT_CACHE_DIR }}/buildkit-state.tar
           key: ${{ runner.os }}-buildx-${{ github.ref }}
           restore-keys: |
             ${{ runner.os }}-buildx-${{ github.ref }}
             ${{ runner.os }}-buildx-
 
-      - name: Load buildkit state from cache
+      - name: Load Buildkit state from cache
         uses: dashevo/gh-action-cache-buildkit-state@v1
         with:
           builder: buildx_buildkit_${{ steps.buildx.outputs.name }}0
-          cache-path: /tmp/buildkit-cache
+          cache-path: ${{ env.BUILDKIT_CACHE_DIR }}
           cache-max-size: 2g
 
       - name: Build Docker image
