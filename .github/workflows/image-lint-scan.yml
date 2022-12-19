@@ -17,7 +17,8 @@ jobs:
       BUILDKIT_CACHE_DIR: /tmp/buildkit-cache
 
     steps:
-      - name: Set up Docker Buildx
+      - id: buildx
+        name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
         with:
           install: true
