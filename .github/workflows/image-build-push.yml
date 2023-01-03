@@ -66,12 +66,12 @@ jobs:
           password: "${{ secrets.cr_password }}"
 
       - name: Enable Buildx Cache
-        uses: slateci/github-actions/.github/actions/buildkit-enable-cache@v12
+        uses: slateci/github-actions/.github/actions/buildkit-enable-cache@v13
         with:
           cache_dir: ${{ env.BUILDKIT_CACHE_DIR }}
 
       - name: Configure Git
-        uses: slateci/github-actions/.github/actions/configure-git@v12
+        uses: slateci/github-actions/.github/actions/configure-git@v13
 
       - name: Build/push image to CR
         uses: docker/build-push-action@v3
