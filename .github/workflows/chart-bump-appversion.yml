@@ -48,7 +48,7 @@ on:
 env:
   HELM_SECRETS_BACKEND: vals
   PRERELEASE_DATETIME_SUFFIX: "%Y%m%d-%H%M%S"
-  SLATE_GITHUB_ACTIONS_BRANCHORTAG: v12
+  SLATE_GITHUB_ACTIONS_BRANCHORTAG: v13
   SLATE_GITHUB_ACTIONS_RAWCONTENT_URL: https://raw.githubusercontent.com/slateci/github-actions
 
 jobs:
@@ -98,10 +98,10 @@ jobs:
           ref: refs/heads/develop
 
       - name: Configure Git
-        uses: slateci/github-actions/.github/actions/configure-git@v12
+        uses: slateci/github-actions/.github/actions/configure-git@v13
 
       - name: Set Up Tools
-        uses: slateci/github-actions/.github/actions/gcloud-helm-setup@v12
+        uses: slateci/github-actions/.github/actions/gcloud-helm-setup@v13
         with:
           cluster_name: ${{ secrets.gc_gke_cluster }}
           location: ${{ secrets.gc_compute_zone }}
@@ -195,10 +195,11 @@ jobs:
           
           echo "RELEASE_VERSION=${{ steps.bump-version.outputs.version }}" >> $GITHUB_ENV
 
-      # TODO: Handle "Tag Pre-Release (Dev)" when tag already exists.
+      # TODO: Better handle "Tag Pre-Release (Dev)" when tag already exists.
 
       - name: Tag Pre-Release (Dev)
         if: ${{ inputs.helm_release_namespace == 'development' }}
+        continue-on-error: true
         working-directory: ./${{ inputs.helm_release_namespace }}
         run: |-
           if [[ '${{ steps.compare-versions.outputs.ahead }}' == 'false' ]]
