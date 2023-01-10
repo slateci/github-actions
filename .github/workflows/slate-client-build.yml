@@ -1,0 +1,94 @@
+name: SLATE Remote Client Build
+concurrency:
+  group: srcb-${{ github.repository }}
+
+on:
+  workflow_call:
+
+jobs:
+  build-linux:
+    name: Build Linux Client
+    runs-on: ubuntu-20.04
+    container: hub.opensciencegrid.org/slate/slate-client-alpine:1.2.0
+    env:
+      CCACHE_NAME: "cpp-client-build-linux"
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          path: ./checkout
+
+      - name: Set up ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ${{ runner.os }}-${{ env.CCACHE_NAME }}-${{ github.ref }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.CCACHE_NAME }}-${{ github.ref }}
+            ${{ runner.os }}-${{ env.CCACHE_NAME }}-
+
+      - name: Build SLATE client
+        working-directory: ./checkout/build
+        run: |-
+          cmake .. \
+            -D CMAKE_C_COMPILER_LAUNCHER=ccache \
+            -D CMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            -DBUILD_CLIENT=True \
+            -DBUILD_SERVER=False \
+            -DBUILD_SERVER_TESTS=False \
+            -DSTATIC_CLIENT=True
+          make -j2 -k
+
+      - name: Strip symbols from SLATE client binary
+        working-directory: ./checkout/build
+        run: |-
+          strip slate
+
+  build-macos:
+    name: Build MacOS Clients
+    runs-on: ${{ matrix.os }}-${{ matrix.version }}
+    strategy:
+      fail-fast: true
+      matrix:
+        os:
+          - macos
+        version:
+          - 11
+          - 12
+
+    env:
+      CCACHE_NAME: "cpp-client-build-${{ matrix.os }}-${{ matrix.version }}"
+      FILE_NAME: "slate-${{ matrix.os }}-${{ matrix.version }}"
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          path: ./checkout
+
+      - name: Set up ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ${{ runner.os }}-${{ env.CCACHE_NAME }}-${{ github.ref }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.CCACHE_NAME }}-${{ github.ref }}
+            ${{ runner.os }}-${{ env.CCACHE_NAME }}-
+
+      - name: Build SLATE client
+        working-directory: ./checkout/build
+        run: |-
+          cmake .. \
+            -D CMAKE_C_COMPILER_LAUNCHER=ccache \
+            -D CMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            -DBUILD_CLIENT=True \
+            -DBUILD_SERVER=False \
+            -DBUILD_SERVER_TESTS=False \
+            -DSTATIC_CLIENT=True
+          make -j2 -k
+
+      - name: Strip symbols from SLATE client binary
+        working-directory: ./checkout/build
+        run: |-
+          strip slate
