@@ -76,8 +76,8 @@ jobs:
         working-directory: ${{ inputs.helm_working_directory }}
         run: |-
           helm secrets upgrade ${{ inputs.helm_release_prefix }}-${{ env.HELM_RELEASE_NAMESPACE_SHORTHAND }} . \
-          -f ./vars/${{ env.HELM_RELEASE_NAMESPACE_SHORTHAND }}/secrets.yml \
-          -f ./vars/${{ env.HELM_RELEASE_NAMESPACE_SHORTHAND }}/values.yml \
           -f ./vars/secrets.yml \
           -f ./vars/values.yml \
+          -f ./vars/${{ env.HELM_RELEASE_NAMESPACE_SHORTHAND }}/secrets.yml \
+          -f ./vars/${{ env.HELM_RELEASE_NAMESPACE_SHORTHAND }}/values.yml \
           -n ${{ inputs.helm_release_namespace }}

@@ -60,30 +60,30 @@ jobs:
         working-directory: ${{ inputs.helm_working_directory }}
         run: |-
           helm secrets diff upgrade ${{ inputs.helm_release_prefix }}-dev . \
-          -f ./vars/dev/secrets.yml \
-          -f ./vars/dev/values.yml \
           -f ./vars/secrets.yml \
           -f ./vars/values.yml \
+          -f ./vars/dev/secrets.yml \
+          -f ./vars/dev/values.yml \
           -n development
 
       - name: Diff the STAGING chart
         working-directory: ${{ inputs.helm_working_directory }}
         run: |-
           helm secrets diff upgrade ${{ inputs.helm_release_prefix }}-staging . \
-          -f ./vars/staging/secrets.yml \
-          -f ./vars/staging/values.yml \
           -f ./vars/secrets.yml \
           -f ./vars/values.yml \
+          -f ./vars/staging/secrets.yml \
+          -f ./vars/staging/values.yml \
           -n staging
 
       - name: Diff the PROD chart
         working-directory: ${{ inputs.helm_working_directory }}
         run: |-
           helm secrets diff upgrade ${{ inputs.helm_release_prefix }}-prod . \
-          -f ./vars/prod/secrets.yml \
-          -f ./vars/prod/values.yml \
           -f ./vars/secrets.yml \
           -f ./vars/values.yml \
+          -f ./vars/prod/secrets.yml \
+          -f ./vars/prod/values.yml \
           -n production \
           --allow-unreleased
 
@@ -92,25 +92,25 @@ jobs:
         working-directory: ${{ inputs.helm_working_directory }}
         run: |-
           helm secrets lint . \
-          -f ./vars/dev/secrets.yml \
-          -f ./vars/dev/values.yml \
           -f ./vars/secrets.yml \
-          -f ./vars/values.yml
+          -f ./vars/values.yml \
+          -f ./vars/dev/secrets.yml \
+          -f ./vars/dev/values.yml
           
       - name: Lint the STAGING chart
         working-directory: ${{ inputs.helm_working_directory }}
         run: |-
           helm secrets lint . \
-          -f ./vars/staging/secrets.yml \
-          -f ./vars/staging/values.yml \
           -f ./vars/secrets.yml \
-          -f ./vars/values.yml
+          -f ./vars/values.yml \
+          -f ./vars/staging/secrets.yml \
+          -f ./vars/staging/values.yml
 
       - name: Lint the PROD chart
         working-directory: ${{ inputs.helm_working_directory }}
         run: |-
           helm secrets lint . \
-          -f ./vars/prod/secrets.yml \
-          -f ./vars/prod/values.yml \
           -f ./vars/secrets.yml \
-          -f ./vars/values.yml
+          -f ./vars/values.yml \
+          -f ./vars/prod/secrets.yml \
+          -f ./vars/prod/values.yml
