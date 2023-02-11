@@ -36,13 +36,6 @@ runs:
         workload_identity_provider: ${{ inputs.workload_identity_provider }}
         service_account: ${{ inputs.service_account }}
 
-    - id: get-credentials
-      name: Get GKE credentials
-      uses: google-github-actions/get-gke-credentials@v0
-      with:
-        cluster_name: ${{ inputs.cluster_name }}
-        location: ${{ inputs.location }}
-
     - name: Set up Cloud SDK
       uses: google-github-actions/setup-gcloud@v0
 
