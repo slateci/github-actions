@@ -51,7 +51,7 @@ on:
         required: true
 
 env:
-  SLATE_GITHUB_ACTIONS_BRANCHORTAG: v14
+  SLATE_GITHUB_ACTIONS_BRANCHORTAG: v15
   SLATE_GITHUB_ACTIONS_RAWCONTENT_URL: https://raw.githubusercontent.com/slateci/github-actions
 
 jobs:
@@ -95,7 +95,7 @@ jobs:
           path: ./checkout
 
       - name: Configure Git
-        uses: slateci/github-actions/.github/actions/configure-git@v14
+        uses: slateci/github-actions/.github/actions/configure-git@v15
 
       - name: Set up Python
         uses: actions/setup-python@v4

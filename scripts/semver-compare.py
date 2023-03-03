@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-This is a script to return a GitHub output variable describing whether a deployed semantic version
+This is a script to append $GITHUB_OUTPUT with a key-value pair describing whether a deployed semantic version
 is newer than its counterpart in the repository's ``Chart.yaml``, specifically the ``appVersion``
 metadata.
 
@@ -21,7 +21,6 @@ import logging
 import os
 import subprocess
 import semver
-import sys
 import yaml
 from yaml.loader import SafeLoader
 
@@ -74,10 +73,12 @@ if __name__ == '__main__':
             f"The source appVersion \"{discovered_appversion}\" in Chart.yaml is not ahead" +
             f" of the deployed appVersion \"{deployed_appversion}\"."
         )
-        sys.stdout.write("::set-output name=ahead::false\n")
+        with open(os.environ['GITHUB_OUTPUT'], 'a') as filehandler:
+            print("ahead=false", file=filehandler)
     else:
         logging.info(
             f"The source appVersion \"{discovered_appversion}\" in Chart.yaml is ahead" +
             f" of the deployed appVersion \"{deployed_appversion}\"."
         )
-        sys.stdout.write("::set-output name=ahead::true\n")
+        with open(os.environ['GITHUB_OUTPUT'], 'a') as filehandler:
+            print("ahead=true", file=filehandler)

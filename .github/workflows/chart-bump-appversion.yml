@@ -48,7 +48,7 @@ on:
 env:
   HELM_SECRETS_BACKEND: vals
   PRERELEASE_DATETIME_SUFFIX: "%Y%m%d-%H%M%S"
-  SLATE_GITHUB_ACTIONS_BRANCHORTAG: v14
+  SLATE_GITHUB_ACTIONS_BRANCHORTAG: v15
   SLATE_GITHUB_ACTIONS_RAWCONTENT_URL: https://raw.githubusercontent.com/slateci/github-actions
 
 jobs:
@@ -98,10 +98,10 @@ jobs:
           ref: refs/heads/develop
 
       - name: Configure Git
-        uses: slateci/github-actions/.github/actions/configure-git@v14
+        uses: slateci/github-actions/.github/actions/configure-git@v15
 
       - name: Set Up Tools
-        uses: slateci/github-actions/.github/actions/gcloud-helm-setup@v14
+        uses: slateci/github-actions/.github/actions/gcloud-helm-setup@v15
         with:
           cluster_name: ${{ secrets.gc_gke_cluster }}
           location: ${{ secrets.gc_compute_zone }}
@@ -191,7 +191,7 @@ jobs:
           git push
           
           COMMIT_HASH=$(git log -1 --format="%H")
-          echo "::set-output name=hash::$COMMIT_HASH"
+          echo "hash=$COMMIT_HASH" >> $GITHUB_OUTPUT
           
           echo "RELEASE_VERSION=${{ steps.bump-version.outputs.version }}" >> $GITHUB_ENV
 
@@ -243,7 +243,7 @@ jobs:
           git push
           
           COMMIT_HASH=$(git log -1 --format="%H")
-          echo "::set-output name=hash::$COMMIT_HASH"
+          echo "hash=$COMMIT_HASH" >> $GITHUB_OUTPUT
 
       - name: Tag Release Candidate (Staging)
         if: ${{ inputs.helm_release_namespace == 'staging' }}
