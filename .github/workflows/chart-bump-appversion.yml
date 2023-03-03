@@ -48,7 +48,7 @@ on:
 env:
   HELM_SECRETS_BACKEND: vals
   PRERELEASE_DATETIME_SUFFIX: "%Y%m%d-%H%M%S"
-  SLATE_GITHUB_ACTIONS_BRANCHORTAG: v14
+  SLATE_GITHUB_ACTIONS_BRANCHORTAG: v15
   SLATE_GITHUB_ACTIONS_RAWCONTENT_URL: https://raw.githubusercontent.com/slateci/github-actions
 
 jobs:
@@ -98,10 +98,10 @@ jobs:
           ref: refs/heads/develop
 
       - name: Configure Git
-        uses: slateci/github-actions/.github/actions/configure-git@v14
+        uses: slateci/github-actions/.github/actions/configure-git@v15
 
       - name: Set Up Tools
-        uses: slateci/github-actions/.github/actions/gcloud-helm-setup@v14
+        uses: slateci/github-actions/.github/actions/gcloud-helm-setup@v15
         with:
           cluster_name: ${{ secrets.gc_gke_cluster }}
           location: ${{ secrets.gc_compute_zone }}
