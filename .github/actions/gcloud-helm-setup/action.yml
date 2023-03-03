@@ -53,7 +53,7 @@ runs:
       uses: google-github-actions/setup-gcloud@v0
 
     - name: Install Helm
-      uses: azure/setup-helm@v2.1
+      uses: azure/setup-helm@v3.5
       with:
         version: ${{ inputs.helm_version }}
 
