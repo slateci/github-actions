@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-This is a script to return a GitHub output variable describing the bumped semantic version in the
+This is a script to append $GITHUB_OUTPUT with a key-value pair describing the bumped semantic version in the
 repository's ``Chart.yaml``, specifically the ``appVersion`` metadata.
 
 This script uses the following system environmental variables as inputs:
@@ -21,7 +21,6 @@ import logging
 import os
 import subprocess
 import semver
-import sys
 import yaml
 
 from datetime import datetime
@@ -79,10 +78,12 @@ if __name__ == '__main__':
         app_version = f"{str(new_versioninfo)}-pre.{date_time}"
 
         logging.info(f"New appVersion to apply: {app_version}")
-        sys.stdout.write(f"::set-output name=version::{app_version}\n")
+        with open(os.environ['GITHUB_OUTPUT'], 'a') as filehandler:
+            print(f"version={app_version}", file=filehandler)
     else:
         new_versioninfo = deployed_versioninfo.finalize_version().bump_patch()
         app_version = f"{str(new_versioninfo)}"
 
         logging.info(f"New appVersion to apply: {app_version}")
-        sys.stdout.write(f"::set-output name=version::{str(new_versioninfo)}\n")
+        with open(os.environ['GITHUB_OUTPUT'], 'a') as filehandler:
+            print(f"version={app_version}", file=filehandler)
