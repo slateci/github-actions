@@ -4,174 +4,11 @@ concurrency:
 
 on:
   workflow_call:
-    inputs:
-      github_release_body:
-        description: The body for the GitHub Release.
-        required: false
-        default: |-
-          See https://slateci.io/docs/tools/ for installation and usage instructions.
-        type: string
 
 jobs:
-  build-linux:
-    name: Build Linux Client
-    runs-on: ubuntu-20.04
-    container: hub.opensciencegrid.org/slate/slate-client-alpine:1.2.0
-    env:
-      CCACHE_NAME: "cpp-client-build-linux"
-
-    steps:
-      - name: Download Shared Workflow Properties
-        uses: actions/download-artifact@v3
-        with:
-          name: shared-workflow-props
-
-      - name: Apply Shared Workflow Properties
-        working-directory: .
-        run: |-
-          source workflow.properties
-          echo "RELEASE_VERSION=${releaseVersion}" >> $GITHUB_ENV
-
-      - name: Check out repo
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          path: ./checkout
-          ref: refs/tags/v${{ env.RELEASE_VERSION }}
-
-      - name: Set up ccache
-        uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          key: ${{ runner.os }}-${{ env.CCACHE_NAME }}-${{ github.ref }}
-          restore-keys: |
-            ${{ runner.os }}-${{ env.CCACHE_NAME }}-${{ github.ref }}
-            ${{ runner.os }}-${{ env.CCACHE_NAME }}-
-
-      - name: Build SLATE client
-        working-directory: ./checkout/build
-        env:
-          VERSION_OVERRIDE: ${{ env.RELEASE_VERSION }}
-        run: |-
-          cmake .. \
-            -D CMAKE_C_COMPILER_LAUNCHER=ccache \
-            -D CMAKE_CXX_COMPILER_LAUNCHER=ccache \
-            -DBUILD_CLIENT=True \
-            -DBUILD_SERVER=False \
-            -DBUILD_SERVER_TESTS=False \
-            -DSTATIC_CLIENT=True
-          make -j2 -k
-
-      - name: Strip symbols from SLATE client binary
-        working-directory: ./checkout/build
-        run: |-
-          strip slate
-
-      - name: Create tarball
-        working-directory: ./checkout/build
-        run: |-
-          tar -czvf slate-linux.tar.gz slate
-
-      - name: Generate hash of tarball
-        working-directory: ./checkout/build
-        run: |-
-          sha256sum slate-linux.tar.gz > slate-linux.sha256
-
-      - name: Persist built binary and hash
-        uses: actions/upload-artifact@v3
-        with:
-          name: slate-linux-artifacts
-          path: |-
-            ./checkout/build/slate-linux.tar.gz
-            ./checkout/build/slate-linux.sha256
-          retention-days: 1
-
-  build-macos:
-    name: Build MacOS Clients
-    runs-on: ${{ matrix.os }}-${{ matrix.version }}
-    strategy:
-      fail-fast: true
-      matrix:
-        os:
-          - macos
-        version:
-          - 11
-          - 12
-
-    env:
-      CCACHE_NAME: "cpp-client-build-${{ matrix.os }}-${{ matrix.version }}"
-      FILE_NAME: "slate-${{ matrix.os }}-${{ matrix.version }}"
-
-    steps:
-      - name: Download Shared Workflow Properties
-        uses: actions/download-artifact@v3
-        with:
-          name: shared-workflow-props
-
-      - name: Apply Shared Workflow Properties
-        working-directory: .
-        run: |-
-          source workflow.properties
-          echo "RELEASE_VERSION=${releaseVersion}" >> $GITHUB_ENV
-
-      - name: Check out repo
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          path: ./checkout
-          ref: refs/tags/v${{ env.RELEASE_VERSION }}
-
-      - name: Set up ccache
-        uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          key: ${{ runner.os }}-${{ env.CCACHE_NAME }}-${{ github.ref }}
-          restore-keys: |
-            ${{ runner.os }}-${{ env.CCACHE_NAME }}-${{ github.ref }}
-            ${{ runner.os }}-${{ env.CCACHE_NAME }}-
-
-      - name: Build SLATE client
-        working-directory: ./checkout/build
-        env:
-          VERSION_OVERRIDE: ${{ env.RELEASE_VERSION }}
-        run: |-
-          cmake .. \
-            -D CMAKE_C_COMPILER_LAUNCHER=ccache \
-            -D CMAKE_CXX_COMPILER_LAUNCHER=ccache \
-            -DBUILD_CLIENT=True \
-            -DBUILD_SERVER=False \
-            -DBUILD_SERVER_TESTS=False \
-            -DSTATIC_CLIENT=True
-          make -j2 -k
-
-      - name: Strip symbols from SLATE client binary
-        working-directory: ./checkout/build
-        run: |-
-          strip slate
-
-      - name: Create tarball
-        working-directory: ./checkout/build
-        run: |-
-          tar -czvf ${{ env.FILE_NAME }}.tar.gz slate
-
-      - name: Generate hash of tarball
-        working-directory: ./checkout/build
-        run: |-
-          shasum -b -a 256 ${{ env.FILE_NAME }}.tar.gz > ${{ env.FILE_NAME }}.sha256
-
-      - name: Persist built binary and hash
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ env.FILE_NAME }}-artifacts
-          path: |
-            ./checkout/build/${{ env.FILE_NAME }}.tar.gz
-            ./checkout/build/${{ env.FILE_NAME }}.sha256
-          retention-days: 1
-
   deploy-github:
     name: Deploy to GitHub
     runs-on: ubuntu-20.04
-    needs:
-      - build-linux
-      - build-macos
 
     permissions:
       contents: write
@@ -188,26 +25,9 @@ jobs:
           source workflow.properties
           echo "RELEASE_VERSION=${releaseVersion}" >> $GITHUB_ENV
 
-      - name: Download Linux Binary
-        uses: actions/download-artifact@v3
-        with:
-          name: slate-linux-artifacts
-
-      - name: Download MacOS 11 Binary
-        uses: actions/download-artifact@v3
-        with:
-          name: slate-macos-11-artifacts
-
-      - name: Download MacOS 12 Binary
-        uses: actions/download-artifact@v3
-        with:
-          name: slate-macos-12-artifacts
-
-      - name: Create GitHub Release
+      - name: Update existing GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "*.tar.gz,*.sha256"
-          body: ${{ inputs.github_release_body }}
-          name: Release ${{ env.RELEASE_VERSION }}
+          allowUpdates: true
           tag: refs/tags/v${{ env.RELEASE_VERSION }}
-          prerelease: ${{ contains(env.RELEASE_VERSION, 'pre') }}
+          prerelease: false
