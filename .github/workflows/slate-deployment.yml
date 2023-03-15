@@ -156,6 +156,7 @@ jobs:
 
       - name: Email Changes
         if: ${{ steps.deploy.outputs.add == 'true' || steps.deploy.outputs.modify == 'true' }}
+        continue-on-error: true
         working-directory: ./checkout
         env:
           GITHUB_API_COMMIT_ENDPOINT: "${{ github.api_url }}/repos/${{ github.repository }}/commits"
