@@ -65,6 +65,11 @@ jobs:
       - name: Set up chart-testing
         uses: helm/chart-testing-action@v2.4.0
 
+      - name: Run add-helm-repo (add-traefik-repo)
+        id: add-traefik-repo
+        run: |
+          helm repo add traefik https://helm.traefik.io/traefik.
+
       - name: Run chart-testing (list-changed)
         id: list-changed
         run: |
