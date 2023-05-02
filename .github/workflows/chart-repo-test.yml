@@ -59,7 +59,7 @@ jobs:
 
       - name: Add dependency chart repos
         run: |
-          helm repo add traefik https://helm.traefik.io/traefik --version 10.3.4
+          helm repo add traefik https://helm.traefik.io/traefik
 
       - name: Set up Python
         uses: actions/setup-python@v4
