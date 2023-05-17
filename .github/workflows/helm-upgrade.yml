@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       helm_release_namespace:
-        description: Kubernetes namespace corresponding to a Helm release, e.g. 'development'.
+        description: Kubernetes namespace corresponding to a Helm release, e.g. 'staging'.
         required: true
         type: string
       helm_release_prefix:
@@ -65,7 +65,7 @@ jobs:
           ref: ${{ env.GIT_REF }}
 
       - name: Set Up Tools
-        uses: slateci/github-actions/.github/actions/gcloud-helm-setup@v15
+        uses: slateci/github-actions/.github/actions/gcloud-helm-setup@v16
         with:
           cluster_name: ${{ secrets.gc_gke_cluster }}
           location: ${{ secrets.gc_compute_zone }}

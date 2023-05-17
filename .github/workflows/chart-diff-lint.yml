@@ -48,23 +48,25 @@ jobs:
           path: .
 
       - name: Set Up Tools
-        uses: slateci/github-actions/.github/actions/gcloud-helm-setup@v15
+        uses: slateci/github-actions/.github/actions/gcloud-helm-setup@v16
         with:
           cluster_name: ${{ secrets.gc_gke_cluster }}
           location: ${{ secrets.gc_compute_zone }}
           service_account: ${{ secrets.gc_service_account }}
           workload_identity_provider: ${{ secrets.gc_workload_identity_provider }}
 
-      - name: Diff the DEV chart
-        if: ${{ github.ref }} == 'refs/heads/develop'
-        working-directory: ${{ inputs.helm_working_directory }}
-        run: |-
-          helm secrets diff upgrade ${{ inputs.helm_release_prefix }}-dev . \
-          -f ./vars/secrets.yml \
-          -f ./vars/values.yml \
-          -f ./vars/dev/secrets.yml \
-          -f ./vars/dev/values.yml \
-          -n development
+# Un-comment this block to re-support the DEV environment corresponding to the develop git branch.
+#
+#      - name: Diff the DEV chart
+#        if: ${{ github.ref }} == 'refs/heads/develop'
+#        working-directory: ${{ inputs.helm_working_directory }}
+#        run: |-
+#          helm secrets diff upgrade ${{ inputs.helm_release_prefix }}-dev . \
+#          -f ./vars/secrets.yml \
+#          -f ./vars/values.yml \
+#          -f ./vars/dev/secrets.yml \
+#          -f ./vars/dev/values.yml \
+#          -n development
 
       - name: Diff the STAGING chart
         working-directory: ${{ inputs.helm_working_directory }}
@@ -87,15 +89,17 @@ jobs:
           -n production \
           --allow-unreleased
 
-      - name: Lint the DEV chart
-        if: ${{ github.ref }} == 'refs/heads/develop'
-        working-directory: ${{ inputs.helm_working_directory }}
-        run: |-
-          helm secrets lint . \
-          -f ./vars/secrets.yml \
-          -f ./vars/values.yml \
-          -f ./vars/dev/secrets.yml \
-          -f ./vars/dev/values.yml
+# Un-comment this block to re-support the DEV environment corresponding to the develop git branch.
+#
+#      - name: Lint the DEV chart
+#        if: ${{ github.ref }} == 'refs/heads/develop'
+#        working-directory: ${{ inputs.helm_working_directory }}
+#        run: |-
+#          helm secrets lint . \
+#          -f ./vars/secrets.yml \
+#          -f ./vars/values.yml \
+#          -f ./vars/dev/secrets.yml \
+#          -f ./vars/dev/values.yml
           
       - name: Lint the STAGING chart
         working-directory: ${{ inputs.helm_working_directory }}

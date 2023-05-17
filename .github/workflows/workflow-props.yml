@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       helm_release_namespace:
-        description: Kubernetes namespace corresponding to a Helm release, e.g. 'development'.
+        description: Kubernetes namespace corresponding to a Helm release, e.g. 'staging'.
         required: true
         type: string
       helm_working_directory:
@@ -34,11 +34,13 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      - name: "Chosen environment: development"
-        if: ${{ inputs.helm_release_namespace == 'development' }}
-        run: |-
-          echo "GIT_REF=refs/heads/develop" >> $GITHUB_ENV
-          echo "HELM_RELEASE_NAMESPACE_SHORTHAND=dev" >> $GITHUB_ENV
+# Un-comment this block to re-support the DEV environment corresponding to the develop git branch.
+#
+#      - name: "Chosen environment: development"
+#        if: ${{ inputs.helm_release_namespace == 'development' }}
+#        run: |-
+#          echo "GIT_REF=refs/heads/develop" >> $GITHUB_ENV
+#          echo "HELM_RELEASE_NAMESPACE_SHORTHAND=dev" >> $GITHUB_ENV
 
       - name: "Chosen environment: staging"
         if: ${{ inputs.helm_release_namespace == 'staging' }}
