@@ -223,25 +223,29 @@ jobs:
 #          git tag v${{ env.RELEASE_VERSION }} $COMMIT_HASH
 #          git push origin v${{ env.RELEASE_VERSION }}
 
-      - name: Apply Release Version (Staging - ahead)
-        if: ${{ inputs.helm_release_namespace == 'staging' && steps.compare-versions.outputs.ahead == 'true' }}
-        working-directory: ./development/${{ inputs.helm_working_directory }}
-        run: |-
-          sed -i "s/^appVersion:.*$/appVersion: '${{ env.RELEASE_VERSION }}'/g" Chart.yaml
-          git add Chart.yaml
-          git commit -m "(github-action) Increment appVersion: ${{ env.RELEASE_VERSION }}"
-          git push
+# Un-comment this block to re-support the DEV environment corresponding to the develop git branch.
+#
+#      - name: Apply Release Version (Staging - ahead)
+#        if: ${{ inputs.helm_release_namespace == 'staging' && steps.compare-versions.outputs.ahead == 'true' }}
+#        working-directory: ./development/${{ inputs.helm_working_directory }}
+#        run: |-
+#          sed -i "s/^appVersion:.*$/appVersion: '${{ env.RELEASE_VERSION }}'/g" Chart.yaml
+#          git add Chart.yaml
+#          git commit -m "(github-action) Increment appVersion: ${{ env.RELEASE_VERSION }}"
+#          git push
 
-      - name: Apply Release Version (Staging - behind)
-        if: ${{ inputs.helm_release_namespace == 'staging' && steps.compare-versions.outputs.ahead == 'false' }}
-        working-directory: ./development/${{ inputs.helm_working_directory }}
-        run: |-
-          sed -i "s/^appVersion:.*$/appVersion: '${{ steps.bump-version.outputs.version }}'/g" Chart.yaml
-          git add Chart.yaml
-          git commit -m "(github-action) Increment appVersion: ${{ steps.bump-version.outputs.version }}"
-          git push
-          
-          echo "RELEASE_VERSION=${{ steps.bump-version.outputs.version }}" >> $GITHUB_ENV
+# Un-comment this block to re-support the DEV environment corresponding to the develop git branch.
+#
+#      - name: Apply Release Version (Staging - behind)
+#        if: ${{ inputs.helm_release_namespace == 'staging' && steps.compare-versions.outputs.ahead == 'false' }}
+#        working-directory: ./development/${{ inputs.helm_working_directory }}
+#        run: |-
+#          sed -i "s/^appVersion:.*$/appVersion: '${{ steps.bump-version.outputs.version }}'/g" Chart.yaml
+#          git add Chart.yaml
+#          git commit -m "(github-action) Increment appVersion: ${{ steps.bump-version.outputs.version }}"
+#          git push
+#
+#          echo "RELEASE_VERSION=${{ steps.bump-version.outputs.version }}" >> $GITHUB_ENV
 
 # Un-comment this block to re-support the DEV environment corresponding to the develop git branch.
 #
