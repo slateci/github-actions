@@ -6,7 +6,7 @@ on:
   workflow_call:
     inputs:
       helm_release_namespace:
-        description: Kubernetes namespace corresponding to a Helm release, e.g. 'development', 'staging'.
+        description: Kubernetes namespace corresponding to a Helm release, e.g. 'staging'.
         required: true
         type: string
       helm_release_prefix:
@@ -61,11 +61,13 @@ jobs:
       id-token: write
 
     steps:
-      - name: "Chosen environment: development"
-        if: ${{ inputs.helm_release_namespace == 'development' }}
-        run: |-
-          echo "GIT_REF=refs/heads/develop" >> $GITHUB_ENV
-          echo "HELM_RELEASE_NAMESPACE_SHORTHAND=dev" >> $GITHUB_ENV
+# Un-comment this block to re-support the DEV environment corresponding to the develop git branch.
+#
+#      - name: "Chosen environment: development"
+#        if: ${{ inputs.helm_release_namespace == 'development' }}
+#        run: |-
+#          echo "GIT_REF=refs/heads/develop" >> $GITHUB_ENV
+#          echo "HELM_RELEASE_NAMESPACE_SHORTHAND=dev" >> $GITHUB_ENV
 
       - name: "Chosen environment: staging"
         if: ${{ inputs.helm_release_namespace == 'staging' }}
@@ -89,13 +91,15 @@ jobs:
           path: ./${{ inputs.helm_release_namespace }}
           ref: ${{ env.GIT_REF }}
 
-      - name: Check out repo develop branch (Staging)
-        if: ${{ inputs.helm_release_namespace == 'staging' }}
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          path: ./development
-          ref: refs/heads/develop
+# Un-comment this block to re-support the DEV environment corresponding to the develop git branch.
+#
+#      - name: Check out repo develop branch (Staging)
+#        if: ${{ inputs.helm_release_namespace == 'staging' }}
+#        uses: actions/checkout@v3
+#        with:
+#          fetch-depth: 0
+#          path: ./development
+#          ref: refs/heads/develop
 
       - name: Configure Git
         uses: slateci/github-actions/.github/actions/configure-git@v15
@@ -126,22 +130,24 @@ jobs:
             curl -fsSL ${{ env.SLATE_GITHUB_ACTIONS_RAWCONTENT_URL }}/${{ env.SLATE_GITHUB_ACTIONS_BRANCHORTAG }}/scripts/$FILENAME -o $FILENAME
           done
 
-      - name: Find Release Version (Dev)
-        if: ${{ inputs.helm_release_namespace == 'development' }}
-        uses: jannekem/run-python-script-action@v1
-        with:
-          script: |
-            import yaml
-            
-            with open("./${{ inputs.helm_release_namespace }}/${{ inputs.helm_working_directory }}/Chart.yaml") as stream:
-              try:
-                data_loaded = yaml.safe_load(stream)
-              except yaml.YAMLError as ex:
-                raise ex
-              app_version = data_loaded["appVersion"]
-            
-            print(f"Setting RELEASE_VERSION to: {app_version}")
-            set_env("RELEASE_VERSION", app_version)
+# Un-comment this block to re-support the DEV environment corresponding to the develop git branch.
+#
+#      - name: Find Release Version (Dev)
+#        if: ${{ inputs.helm_release_namespace == 'development' }}
+#        uses: jannekem/run-python-script-action@v1
+#        with:
+#          script: |
+#            import yaml
+#
+#            with open("./${{ inputs.helm_release_namespace }}/${{ inputs.helm_working_directory }}/Chart.yaml") as stream:
+#              try:
+#                data_loaded = yaml.safe_load(stream)
+#              except yaml.YAMLError as ex:
+#                raise ex
+#              app_version = data_loaded["appVersion"]
+#
+#            print(f"Setting RELEASE_VERSION to: {app_version}")
+#            set_env("RELEASE_VERSION", app_version)
 
       - name: Find Release Version (Staging)
         if: ${{ inputs.helm_release_namespace == 'staging' }}
@@ -179,39 +185,43 @@ jobs:
         run: |-
           python semver-bump.py
 
-      - id: apply-dev-behind-version
-        name: Apply Release Version (Dev - behind)
-        if: ${{ inputs.helm_release_namespace == 'development' && steps.compare-versions.outputs.ahead == 'false' }}
-        working-directory: ./${{ inputs.helm_release_namespace }}/${{ inputs.helm_working_directory }}
-        run: |-
-          git fetch
-          sed -i 's/^appVersion:.*$/appVersion: "${{ steps.bump-version.outputs.version }}"/g' Chart.yaml
-          git add Chart.yaml
-          git commit -m '(github-action) Increment appVersion: ${{ steps.bump-version.outputs.version }}'
-          git push
-          
-          COMMIT_HASH=$(git log -1 --format="%H")
-          echo "hash=$COMMIT_HASH" >> $GITHUB_OUTPUT
-          
-          echo "RELEASE_VERSION=${{ steps.bump-version.outputs.version }}" >> $GITHUB_ENV
+# Un-comment this block to re-support the DEV environment corresponding to the develop git branch.
+#
+#      - id: apply-dev-behind-version
+#        name: Apply Release Version (Dev - behind)
+#        if: ${{ inputs.helm_release_namespace == 'development' && steps.compare-versions.outputs.ahead == 'false' }}
+#        working-directory: ./${{ inputs.helm_release_namespace }}/${{ inputs.helm_working_directory }}
+#        run: |-
+#          git fetch
+#          sed -i 's/^appVersion:.*$/appVersion: "${{ steps.bump-version.outputs.version }}"/g' Chart.yaml
+#          git add Chart.yaml
+#          git commit -m '(github-action) Increment appVersion: ${{ steps.bump-version.outputs.version }}'
+#          git push
+#
+#          COMMIT_HASH=$(git log -1 --format="%H")
+#          echo "hash=$COMMIT_HASH" >> $GITHUB_OUTPUT
+#
+#          echo "RELEASE_VERSION=${{ steps.bump-version.outputs.version }}" >> $GITHUB_ENV
 
       # TODO: Better handle "Tag Pre-Release (Dev)" when tag already exists.
 
-      - name: Tag Pre-Release (Dev)
-        if: ${{ inputs.helm_release_namespace == 'development' }}
-        continue-on-error: true
-        working-directory: ./${{ inputs.helm_release_namespace }}
-        run: |-
-          if [[ '${{ steps.compare-versions.outputs.ahead }}' == 'false' ]]
-          then
-            COMMIT_HASH=${{ steps.apply-dev-behind-version.outputs.hash }}
-          else
-            COMMIT_HASH=$(git log -1 --format="%H")
-          fi
-          
-          git fetch
-          git tag v${{ env.RELEASE_VERSION }} $COMMIT_HASH
-          git push origin v${{ env.RELEASE_VERSION }}
+# Un-comment this block to re-support the DEV environment corresponding to the develop git branch.
+#
+#      - name: Tag Pre-Release (Dev)
+#        if: ${{ inputs.helm_release_namespace == 'development' }}
+#        continue-on-error: true
+#        working-directory: ./${{ inputs.helm_release_namespace }}
+#        run: |-
+#          if [[ '${{ steps.compare-versions.outputs.ahead }}' == 'false' ]]
+#          then
+#            COMMIT_HASH=${{ steps.apply-dev-behind-version.outputs.hash }}
+#          else
+#            COMMIT_HASH=$(git log -1 --format="%H")
+#          fi
+#
+#          git fetch
+#          git tag v${{ env.RELEASE_VERSION }} $COMMIT_HASH
+#          git push origin v${{ env.RELEASE_VERSION }}
 
       - name: Apply Release Version (Staging - ahead)
         if: ${{ inputs.helm_release_namespace == 'staging' && steps.compare-versions.outputs.ahead == 'true' }}
@@ -233,17 +243,19 @@ jobs:
           
           echo "RELEASE_VERSION=${{ steps.bump-version.outputs.version }}" >> $GITHUB_ENV
 
-      - id: merge-staging
-        name: Merge develop to master branch (Staging)
-        if: ${{ inputs.helm_release_namespace == 'staging' }}
-        working-directory: ./${{ inputs.helm_release_namespace }}
-        run: |-
-          git fetch
-          git merge origin/develop --commit -m '(github-action) Merge develop with master for: ${{ env.RELEASE_VERSION }}' --no-ff
-          git push
-          
-          COMMIT_HASH=$(git log -1 --format="%H")
-          echo "hash=$COMMIT_HASH" >> $GITHUB_OUTPUT
+# Un-comment this block to re-support the DEV environment corresponding to the develop git branch.
+#
+#      - id: merge-staging
+#        name: Merge develop to master branch (Staging)
+#        if: ${{ inputs.helm_release_namespace == 'staging' }}
+#        working-directory: ./${{ inputs.helm_release_namespace }}
+#        run: |-
+#          git fetch
+#          git merge origin/develop --commit -m '(github-action) Merge develop with master for: ${{ env.RELEASE_VERSION }}' --no-ff
+#          git push
+#
+#          COMMIT_HASH=$(git log -1 --format="%H")
+#          echo "hash=$COMMIT_HASH" >> $GITHUB_OUTPUT
 
       - name: Tag Release Candidate (Staging)
         if: ${{ inputs.helm_release_namespace == 'staging' }}
@@ -255,40 +267,44 @@ jobs:
 
 # TODO: Only perform force-bump-version-staging if dev is behind staging...
 
-      - id: force-bump-version-staging
-        name: Force-bump Release Version on develop branch (Staging)
-        if: ${{ inputs.helm_release_namespace == 'staging' }}
-        uses: jannekem/run-python-script-action@v1
-        with:
-          script: |
-            import semver
-            import yaml
-            
-            from datetime import datetime
-            
-            prerelease_datetime_suffix = os.environ.get('PRERELEASE_DATETIME_SUFFIX')
-            
-            with open("./development//${{ inputs.helm_working_directory }}/Chart.yaml") as stream:
-              try:
-                data_loaded = yaml.safe_load(stream)
-              except yaml.YAMLError as ex:
-                raise ex
-              app_version = data_loaded["appVersion"]
-            
-            discovered_versioninfo = semver.VersionInfo.parse(app_version)
-            new_versioninfo = discovered_versioninfo.finalize_version().bump_patch()
-            now = datetime.now()
-            date_time = now.strftime(prerelease_datetime_suffix)
-            new_app_version = f"{str(new_versioninfo)}-pre.{date_time}"
-            print(f"New appVersion is: {new_app_version}")
-            set_output("version", new_app_version)
+# Un-comment this block to re-support the DEV environment corresponding to the develop git branch.
+#
+#      - id: force-bump-version-staging
+#        name: Force-bump Release Version on develop branch (Staging)
+#        if: ${{ inputs.helm_release_namespace == 'staging' }}
+#        uses: jannekem/run-python-script-action@v1
+#        with:
+#          script: |
+#            import semver
+#            import yaml
+#
+#            from datetime import datetime
+#
+#            prerelease_datetime_suffix = os.environ.get('PRERELEASE_DATETIME_SUFFIX')
+#
+#            with open("./development//${{ inputs.helm_working_directory }}/Chart.yaml") as stream:
+#              try:
+#                data_loaded = yaml.safe_load(stream)
+#              except yaml.YAMLError as ex:
+#                raise ex
+#              app_version = data_loaded["appVersion"]
+#
+#            discovered_versioninfo = semver.VersionInfo.parse(app_version)
+#            new_versioninfo = discovered_versioninfo.finalize_version().bump_patch()
+#            now = datetime.now()
+#            date_time = now.strftime(prerelease_datetime_suffix)
+#            new_app_version = f"{str(new_versioninfo)}-pre.{date_time}"
+#            print(f"New appVersion is: {new_app_version}")
+#            set_output("version", new_app_version)
 
-      - name: Force-apply Release Version on develop branch (Staging)
-        if: ${{ inputs.helm_release_namespace == 'staging' }}
-        working-directory: ./development/${{ inputs.helm_working_directory }}
-        run: |-
-          git fetch
-          sed -i 's/^appVersion:.*$/appVersion: "${{ steps.force-bump-version-staging.outputs.version }}"/g' Chart.yaml
-          git add Chart.yaml
-          git commit -m '(github-action) Increment appVersion: ${{ steps.force-bump-version-staging.outputs.version }}'
-          git push
+# Un-comment this block to re-support the DEV environment corresponding to the develop git branch.
+#
+#      - name: Force-apply Release Version on develop branch (Staging)
+#        if: ${{ inputs.helm_release_namespace == 'staging' }}
+#        working-directory: ./development/${{ inputs.helm_working_directory }}
+#        run: |-
+#          git fetch
+#          sed -i 's/^appVersion:.*$/appVersion: "${{ steps.force-bump-version-staging.outputs.version }}"/g' Chart.yaml
+#          git add Chart.yaml
+#          git commit -m '(github-action) Increment appVersion: ${{ steps.force-bump-version-staging.outputs.version }}'
+#          git push

@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       helm_release_namespace:
-        description: Kubernetes namespace corresponding to a Helm release, e.g. 'development'.
+        description: Kubernetes namespace corresponding to a Helm release, e.g. 'staging'.
         required: true
         type: string
       helm_release_prefix:
