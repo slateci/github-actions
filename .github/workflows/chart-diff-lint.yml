@@ -48,7 +48,7 @@ jobs:
           path: .
 
       - name: Set Up Tools
-        uses: slateci/github-actions/.github/actions/gcloud-helm-setup@v15
+        uses: slateci/github-actions/.github/actions/gcloud-helm-setup@v16
         with:
           cluster_name: ${{ secrets.gc_gke_cluster }}
           location: ${{ secrets.gc_compute_zone }}
