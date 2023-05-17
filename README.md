@@ -4,10 +4,10 @@
 
 This repository contains GitHub Actions, Workflows, etc. used by the different SLATECI repositories and described in the [internal documentation](https://docs.google.com/document/d/1xcTZJKUvo4rbQVtDDIzyDYCkYmTXIRbSQsUR17rvxzk/edit).
 
-* To restore support for a development environment tied to repositories' *develop* branches, uncomment the sections of YAML that begin with:
+* To restore support for a development environment tied to repositories' *develop* branches, follow the instructions in the sections of YAML that begin with:
 
   ```yaml
-  # Un-comment this block to re-support the DEV environment corresponding to the develop git branch.
+  # ... re-support the DEV environment corresponding to the develop git branch.
   #
   ...
   ```
