@@ -96,6 +96,7 @@ jobs:
         version:
           - 11
           - 12
+          - 13
 
     env:
       CCACHE_NAME: "cpp-client-build-${{ matrix.os }}-${{ matrix.version }}"
@@ -202,6 +203,11 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: slate-macos-12-artifacts
+
+      - name: Download MacOS 13 Binary
+        uses: actions/download-artifact@v3
+        with:
+          name: slate-macos-13-artifacts
 
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
