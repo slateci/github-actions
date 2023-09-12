@@ -33,7 +33,7 @@ jobs:
           echo "RELEASE_VERSION=${releaseVersion}" >> $GITHUB_ENV
 
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           path: ./checkout
@@ -115,7 +115,7 @@ jobs:
           echo "RELEASE_VERSION=${releaseVersion}" >> $GITHUB_ENV
 
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           path: ./checkout
