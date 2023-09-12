@@ -85,7 +85,7 @@ jobs:
             raise Exception(message)
 
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           path: ./${{ inputs.helm_release_namespace }}
@@ -95,7 +95,7 @@ jobs:
 #
 #      - name: Check out repo develop branch (Staging)
 #        if: ${{ inputs.helm_release_namespace == 'staging' }}
-#        uses: actions/checkout@v3
+#        uses: actions/checkout@v4
 #        with:
 #          fetch-depth: 0
 #          path: ./development
