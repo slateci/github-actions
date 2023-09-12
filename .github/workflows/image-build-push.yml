@@ -74,7 +74,7 @@ jobs:
         uses: slateci/github-actions/.github/actions/configure-git@v16
 
       - name: Build/push image to CR
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: ./resources/docker/Dockerfile
