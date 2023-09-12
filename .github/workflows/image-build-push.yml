@@ -59,7 +59,7 @@ jobs:
           repository: ${{ inputs.repository }}
 
       - name: Authenticate with CR
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ${{ inputs.cr_domain }}
           username: "${{ secrets.cr_username }}"
