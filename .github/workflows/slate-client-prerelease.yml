@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - name: Download Shared Workflow Properties
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: shared-workflow-props
 
@@ -104,7 +104,7 @@ jobs:
 
     steps:
       - name: Download Shared Workflow Properties
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: shared-workflow-props
 
@@ -179,7 +179,7 @@ jobs:
 
     steps:
       - name: Download Shared Workflow Properties
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: shared-workflow-props
 
@@ -190,22 +190,22 @@ jobs:
           echo "RELEASE_VERSION=${releaseVersion}" >> $GITHUB_ENV
 
       - name: Download Linux Binary
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: slate-linux-artifacts
 
       - name: Download MacOS 11 Binary
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: slate-macos-11-artifacts
 
       - name: Download MacOS 12 Binary
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: slate-macos-12-artifacts
 
       - name: Download MacOS 13 Binary
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: slate-macos-13-artifacts
 
