@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - name: Download Shared Workflow Properties
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: shared-workflow-props
 
@@ -77,7 +77,7 @@ jobs:
           sha256sum slate-linux.tar.gz > slate-linux.sha256
 
       - name: Persist built binary and hash
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: slate-linux-artifacts
           path: |-
@@ -104,7 +104,7 @@ jobs:
 
     steps:
       - name: Download Shared Workflow Properties
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: shared-workflow-props
 
@@ -159,7 +159,7 @@ jobs:
           shasum -b -a 256 ${{ env.FILE_NAME }}.tar.gz > ${{ env.FILE_NAME }}.sha256
 
       - name: Persist built binary and hash
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.FILE_NAME }}-artifacts
           path: |
@@ -179,7 +179,7 @@ jobs:
 
     steps:
       - name: Download Shared Workflow Properties
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: shared-workflow-props
 
@@ -190,22 +190,22 @@ jobs:
           echo "RELEASE_VERSION=${releaseVersion}" >> $GITHUB_ENV
 
       - name: Download Linux Binary
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: slate-linux-artifacts
 
       - name: Download MacOS 11 Binary
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: slate-macos-11-artifacts
 
       - name: Download MacOS 12 Binary
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: slate-macos-12-artifacts
 
       - name: Download MacOS 13 Binary
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: slate-macos-13-artifacts
 
