@@ -58,7 +58,7 @@ jobs:
 
     steps:
       - name: Download Shared Workflow Properties
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: shared-workflow-props
 
@@ -79,7 +79,7 @@ jobs:
           workload_identity_provider: ${{ secrets.gc_workload_identity_provider }}
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ inputs.python_version }}
 
