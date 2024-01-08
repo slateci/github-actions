@@ -62,7 +62,7 @@ jobs:
           helm repo add traefik https://helm.traefik.io/traefik
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ inputs.python_version }}
 

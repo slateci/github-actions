@@ -62,7 +62,7 @@ jobs:
           ref: ${{ env.GIT_REF }}
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ inputs.python_version }}
 
@@ -98,7 +98,7 @@ jobs:
           echo "releaseVersion=${{ env.RELEASE_VERSION }}" >> workflow.properties
 
       - name: Upload Workflow Properties
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: shared-workflow-props
           path: ./workflow.properties
