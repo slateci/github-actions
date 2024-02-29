@@ -71,7 +71,7 @@ jobs:
           echo "RELEASE_VERSION=${releaseVersion}" >> $GITHUB_ENV
 
       - name: Set Up Tools
-        uses: slateci/github-actions/.github/actions/gcloud-helm-setup@17
+        uses: slateci/github-actions/.github/actions/gcloud-helm-setup@v17
         with:
           cluster_name: ${{ secrets.gc_gke_cluster }}
           location: ${{ secrets.gc_compute_zone }}
