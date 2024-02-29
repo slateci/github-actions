@@ -102,10 +102,10 @@ jobs:
 #          ref: refs/heads/develop
 
       - name: Configure Git
-        uses: slateci/github-actions/.github/actions/configure-git@v16
+        uses: slateci/github-actions/.github/actions/configure-git@17
 
       - name: Set Up Tools
-        uses: slateci/github-actions/.github/actions/gcloud-helm-setup@v16
+        uses: slateci/github-actions/.github/actions/gcloud-helm-setup@17
         with:
           cluster_name: ${{ secrets.gc_gke_cluster }}
           location: ${{ secrets.gc_compute_zone }}

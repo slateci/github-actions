@@ -24,7 +24,7 @@ jobs:
           path: .
 
       - name: Enable Buildx Cache
-        uses: slateci/github-actions/.github/actions/buildkit-enable-cache@v16
+        uses: slateci/github-actions/.github/actions/buildkit-enable-cache@17
         with:
           cache_dir: ${{ env.BUILDKIT_CACHE_DIR }}
 
