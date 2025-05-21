@@ -11,7 +11,7 @@ on:
 jobs:
   check:
     name: Check Image
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     env:
       BUILDKIT_CACHE_DIR: /tmp/buildkit-cache
