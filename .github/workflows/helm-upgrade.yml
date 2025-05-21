@@ -37,7 +37,7 @@ env:
 jobs:
   upgrade:
     name: Run Helm Upgrade on GKE
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     permissions:
       contents: read

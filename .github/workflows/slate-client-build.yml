@@ -8,7 +8,7 @@ on:
 jobs:
   build-linux:
     name: Build Linux Client
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     container: hub.opensciencegrid.org/slate/slate-client-alpine:1.2.0
     env:
       CCACHE_NAME: "cpp-client-build-linux"
