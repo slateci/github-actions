@@ -58,7 +58,7 @@ jobs:
           echo "HELM_RELEASE_NAMESPACE_SHORTHAND=${helmReleaseNamespaceShorthand}" >> $GITHUB_ENV
 
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
           path: .
